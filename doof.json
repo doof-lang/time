@@ -1,0 +1,17 @@
+{
+  "name": "std/time",
+  "version": "0.1.0",
+  "license": "ISC",
+  "build": {
+    "native": {
+      "sourceFiles": [
+        "./doof_time.cpp"
+      ],
+      "extraCopyPaths": [
+        "./doof_time.hpp"
+      ]
+    }
+  },
+  "dependencies": {
+  }
+}
