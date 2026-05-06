@@ -8,15 +8,15 @@ import {
 
 function isSuccess<T, E>(result: Result<T, E>): bool {
     return case result {
-        _: Success => true,
-        _: Failure => false
+        _: Success -> true,
+        _: Failure -> false
     }
 }
 
 function isFailure<T, E>(result: Result<T, E>): bool {
     return case result {
-        _: Success => false,
-        _: Failure => true
+        _: Success -> false,
+        _: Failure -> true
     }
 }
 
