@@ -6,6 +6,9 @@
 #include <memory>
 #include <string>
 
+namespace std_ {
+namespace time {
+namespace temporal {
 struct Instant;
 struct Date;
 struct Time;
@@ -13,6 +16,17 @@ struct DateTime;
 struct TimeZone;
 struct ZonedDateTime;
 enum class DayOfWeek;
+}  // namespace temporal
+}  // namespace time
+}  // namespace std_
+
+using Instant = ::std_::time::temporal::Instant;
+using Date = ::std_::time::temporal::Date;
+using Time = ::std_::time::temporal::Time;
+using DateTime = ::std_::time::temporal::DateTime;
+using TimeZone = ::std_::time::temporal::TimeZone;
+using ZonedDateTime = ::std_::time::temporal::ZonedDateTime;
+using DayOfWeek = ::std_::time::temporal::DayOfWeek;
 
 namespace doof_time {
 int64_t system_nanos_epoch();
@@ -45,5 +59,6 @@ doof::Result<std::shared_ptr<TimeZone>, std::string> lookup_timezone(const std::
 std::shared_ptr<TimeZone> system_timezone();
 int32_t zone_offset_at(const std::string& id, int64_t epoch_seconds);
 bool zone_dst_at(const std::string& id, int64_t epoch_seconds);
+void thread_sleep_nanos(int64_t nanos);
 
 }  // namespace doof_time

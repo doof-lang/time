@@ -1,5 +1,5 @@
 import { Assert } from "std/assert"
-import { Date, DateTime, Duration, Instant, Time, TimeZone, Month, DayOfWeek } from "../index"
+import { Date, DateTime, Duration, Instant, Stopwatch, Thread, Time, TimeZone, Month, DayOfWeek } from "../index"
 
 export function testReadmeMeasureElapsedTimeAndDeadlines(): void {
     let startedAt = Instant.ofEpochSeconds(1_000L)
@@ -57,4 +57,20 @@ export function testReadmeParseInputAndInspectTimezoneRules(): void {
     Assert.equal(reviewSlot.toInstant(sydney).toISOString(), "2026-04-21T06:30:00Z")
     Assert.equal(offsetSeconds, 36000)
     Assert.isFalse(sydney.isDSTAt(publishedAt))
+}
+
+export function testReadmeCollectTimingsWithStopwatch(): void {
+    sw := Stopwatch()
+
+    with span := sw.measure("parse") {
+        Thread.sleep(Duration.ofMillis(1L))
+    }
+
+    manual := sw.measure("parse")
+    Thread.sleep(Duration.ofMillis(1L))
+    manual.finish()
+
+    Assert.equal(sw.count("parse"), 2)
+    Assert.isTrue((try! sw.total("parse")).toNanos() >= 0L)
+    Assert.equal(sw.summary().entries.length, 1)
 }

@@ -24,6 +24,38 @@ println("max polls: ${maxPolls}")
 
 `Instant` represents a point in UTC time, while `Duration` models signed elapsed time with nanosecond precision. Both types support arithmetic, comparison, and ISO formatting.
 
+### Sleep the current thread
+
+```doof
+import { Duration, Thread } from "std/time"
+
+Thread.sleep(Duration.ofMillis(50L))
+```
+
+`Thread.sleep(...)` blocks the current operating-system thread for the requested duration. Zero or negative durations return immediately.
+
+### Collect named timings
+
+```doof
+import { Stopwatch } from "std/time"
+
+sw := Stopwatch()
+
+with span := sw.measure("parse") {
+    // ... parsing work ...
+}
+
+manual := sw.measure("render")
+// ... rendering work ...
+manual.finish()
+
+println(sw.count("parse"))
+println((try! sw.total("parse")).toMillis())
+println((try! sw.p95("render")).toMillis())
+```
+
+`Stopwatch` records named spans and reports aggregate `Duration` values for each name. Scoped spans finish automatically when the `with` block exits; manual spans can be finished explicitly and are recorded only once.
+
 ### Build calendar values and move them around safely
 
 ```doof
@@ -95,6 +127,14 @@ Signed elapsed time with nanosecond precision. Use unit constructors like `ofSec
 ### `Instant`
 
 UTC timestamp stored as nanoseconds since the Unix epoch. Supports clock reads with `now()`, parsing from RFC 3339 strings, arithmetic with `Duration`, and conversion to `DateTime` or `ZonedDateTime`.
+
+### `Thread`
+
+Current-thread utilities. Use `sleep(...)` with a `Duration` to block the current operating-system thread.
+
+### `Stopwatch`
+
+Named timing collector for lightweight instrumentation. Use `measure(...)` to create spans, `count(...)` for the number of recorded spans, aggregate methods such as `total(...)`, `mean(...)`, `min(...)`, `max(...)`, and `p95(...)` for durations, and `summary()` for per-label stats.
 
 ### `Date`
 

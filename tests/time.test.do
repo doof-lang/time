@@ -2,8 +2,8 @@
 
 import { Assert } from "std/assert"
 import {
-    Duration, Instant, Date, Time, DateTime, TimeZone, ZonedDateTime,
-    DayOfWeek, Month
+    Duration, Thread, Instant, Date, Time, DateTime, TimeZone, ZonedDateTime,
+    DayOfWeek, Month, Stopwatch, TimerError
 } from "../index"
 
 function isSuccess<T, E>(result: Result<T, E>): bool {
@@ -17,6 +17,17 @@ function isFailure<T, E>(result: Result<T, E>): bool {
     return case result {
         _: Success -> false,
         _: Failure -> true
+    }
+}
+
+function assertTimerFailure(result: Result<Duration, TimerError>, name: string): void {
+    case result {
+        s: Success -> Assert.fail("expected timer lookup to fail")
+        f: Failure -> {
+            Assert.equal(f.error.kind, "MissingTimer")
+            Assert.equal(f.error.name, name)
+            Assert.stringContains(f.error.message, name)
+        }
     }
 }
 
@@ -62,6 +73,104 @@ export function testDurationISOString(): void {
     Assert.equal(Duration.ofHours(3L).plus(Duration.ofMinutes(25L)).plus(Duration.ofSeconds(10L)).toISOString(), "PT3H25M10S")
     Assert.equal(Duration.ofSeconds(5L).negated().toISOString(), "-PT0H0M5S")
     Assert.equal(Duration.ZERO.toISOString(), "PT0H0M0S")
+}
+
+// ─── Thread ──────────────────────────────────────────────────────────────────
+
+export function testThreadSleepZeroAndNegativeDurationsReturn(): void {
+    Thread.sleep(Duration.ZERO)
+    Thread.sleep(Duration.ofMillis(1L).negated())
+    Assert.isTrue(true)
+}
+
+export function testThreadSleepDelaysCurrentThread(): void {
+    let startedAt = Instant.now()
+    Thread.sleep(Duration.ofMillis(5L))
+    let elapsed = startedAt.durationUntil(Instant.now())
+    Assert.isTrue(elapsed.toMillis() >= 1L)
+}
+
+// ─── Stopwatch ───────────────────────────────────────────────────────────────
+
+export function testStopwatchMissingTimer(): void {
+    let sw = Stopwatch()
+
+    Assert.equal(sw.count("missing"), 0)
+    assertTimerFailure(sw.total("missing"), "missing")
+    assertTimerFailure(sw.mean("missing"), "missing")
+    assertTimerFailure(sw.min("missing"), "missing")
+    assertTimerFailure(sw.max("missing"), "missing")
+    assertTimerFailure(sw.p95("missing"), "missing")
+}
+
+export function testStopwatchManualFinishRecordsOnce(): void {
+    let sw = Stopwatch()
+    let span = sw.measure("manual")
+
+    Thread.sleep(Duration.ofMillis(1L))
+    let first = span.finish()
+    let second = span.finish()
+
+    Assert.equal(sw.count("manual"), 1)
+    Assert.equal(first.toNanos(), second.toNanos())
+    Assert.equal((try! sw.total("manual")).toNanos(), first.toNanos())
+}
+
+export function testStopwatchScopedMeasureRecordsOnExit(): void {
+    let sw = Stopwatch()
+
+    with span := sw.measure("scoped") {
+        Thread.sleep(Duration.ofMillis(1L))
+    }
+
+    Assert.equal(sw.count("scoped"), 1)
+    Assert.isTrue((try! sw.total("scoped")).toNanos() >= 0L)
+}
+
+export function testStopwatchAggregatesAndP95(): void {
+    let sw = Stopwatch()
+
+    first := sw.measure("task")
+    Thread.sleep(Duration.ofMillis(1L))
+    let firstDuration = first.finish()
+
+    second := sw.measure("task")
+    Thread.sleep(Duration.ofMillis(2L))
+    let secondDuration = second.finish()
+
+    let total = try! sw.total("task")
+    let mean = try! sw.mean("task")
+    let min = try! sw.min("task")
+    let max = try! sw.max("task")
+    let p95 = try! sw.p95("task")
+
+    Assert.equal(sw.count("task"), 2)
+    Assert.equal(total.toNanos(), firstDuration.toNanos() + secondDuration.toNanos())
+    Assert.equal(mean.toNanos(), total.toNanos() \ 2L)
+    Assert.isTrue(min.toNanos() <= max.toNanos())
+    Assert.equal(p95.toNanos(), max.toNanos())
+}
+
+export function testStopwatchSummary(): void {
+    let sw = Stopwatch()
+
+    a := sw.measure("parse")
+    Thread.sleep(Duration.ofMillis(1L))
+    let parseDuration = a.finish()
+
+    b := sw.measure("render")
+    Thread.sleep(Duration.ofMillis(1L))
+    let renderDuration = b.finish()
+
+    let summary = sw.summary()
+
+    Assert.equal(summary.entries.length, 2)
+    Assert.equal(summary.entries[0].name, "parse")
+    Assert.equal(summary.entries[0].count, 1)
+    Assert.equal(summary.entries[0].total.toNanos(), parseDuration.toNanos())
+    Assert.equal(summary.entries[1].name, "render")
+    Assert.equal(summary.entries[1].count, 1)
+    Assert.equal(summary.entries[1].total.toNanos(), renderDuration.toNanos())
 }
 
 // ─── Instant ─────────────────────────────────────────────────────────────────

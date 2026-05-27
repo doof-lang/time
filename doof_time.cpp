@@ -9,6 +9,7 @@
 #include <mutex>
 #include <string>
 #include <sys/stat.h>
+#include <thread>
 #include <unistd.h>
 
 namespace doof_time {
@@ -677,6 +678,13 @@ bool zone_dst_at(const std::string& id, int64_t epoch_seconds) {
         }
         return local_tm.tm_isdst > 0;
     });
+}
+
+void thread_sleep_nanos(int64_t nanos) {
+    if (nanos <= 0) {
+        return;
+    }
+    std::this_thread::sleep_for(std::chrono::nanoseconds(nanos));
 }
 
 }  // namespace doof_time
