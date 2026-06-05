@@ -22,7 +22,7 @@ println("poll interval: ${pollInterval.toMillis()} ms")
 println("max polls: ${maxPolls}")
 ```
 
-`Instant` represents a point in UTC time, while `Duration` models signed elapsed time with nanosecond precision. Both types support arithmetic, comparison, and ISO formatting.
+`Instant` represents a point in UTC time, while `Duration` models signed elapsed time with nanosecond precision. Both types support arithmetic, comparison, parsing, and ISO formatting. `Duration.toISOString()` uses compact valid forms such as `PT5S`, `PT3H25M10.5S`, and `P2DT3H`.
 
 ### Sleep the current thread
 
@@ -101,17 +101,19 @@ Use `withZoneSameInstant(...)` when the underlying moment must stay the same and
 ### Parse input and inspect timezone rules
 
 ```doof
-import { Date, DateTime, Instant, TimeZone } from "std/time"
+import { Date, DateTime, Duration, Instant, TimeZone } from "std/time"
 
 launchDate := try! Date.parse("2026-04-21")
 publishedAt := try! Instant.parse("2026-04-21T14:00:00Z")
 reviewSlot := try! DateTime.parse("2026-04-21T16:30:00")
+timeout := try! Duration.parse("PT30S")
 
 sydney := try! TimeZone.lookup("Australia/Sydney")
 offsetSeconds := sydney.offsetSecondsAt(publishedAt)
 
 println(launchDate.dayOfYear())
 println(reviewSlot.toInstant(sydney).toISOString())
+println("Timeout: ${timeout.toISOString()}")
 println("UTC offset: ${offsetSeconds} seconds")
 println("DST active: ${sydney.isDSTAt(publishedAt)}")
 ```
@@ -122,7 +124,7 @@ Parsing returns `Result<T, string>`, so you can propagate failures with `try!` o
 
 ### `Duration`
 
-Signed elapsed time with nanosecond precision. Use unit constructors like `ofSeconds(...)`, `ofMinutes(...)`, and `ofDays(...)`, then combine values with arithmetic or format them as ISO 8601 durations.
+Signed elapsed time with nanosecond precision. Use unit constructors like `ofSeconds(...)`, `ofMinutes(...)`, and `ofDays(...)`, parse ISO 8601 durations with `parse(...)`, then combine values with arithmetic or format them as compact ISO 8601 durations.
 
 ### `Instant`
 

@@ -71,8 +71,29 @@ export function testDurationCompareTo(): void {
 
 export function testDurationISOString(): void {
     Assert.equal(Duration.ofHours(3L).plus(Duration.ofMinutes(25L)).plus(Duration.ofSeconds(10L)).toISOString(), "PT3H25M10S")
-    Assert.equal(Duration.ofSeconds(5L).negated().toISOString(), "-PT0H0M5S")
-    Assert.equal(Duration.ZERO.toISOString(), "PT0H0M0S")
+    Assert.equal(Duration.ofSeconds(5L).negated().toISOString(), "-PT5S")
+    Assert.equal(Duration.ofMillis(250L).toISOString(), "PT0.25S")
+    Assert.equal(Duration.ofDays(2L).plus(Duration.ofHours(3L)).toISOString(), "P2DT3H")
+    Assert.equal(Duration.ZERO.toISOString(), "PT0S")
+}
+
+export function testDurationParse(): void {
+    Assert.equal((try! Duration.parse("PT5S")).toNanos(), Duration.ofSeconds(5L).toNanos())
+    Assert.equal((try! Duration.parse("-PT5S")).toNanos(), Duration.ofSeconds(5L).negated().toNanos())
+    Assert.equal((try! Duration.parse("PT0.25S")).toNanos(), Duration.ofMillis(250L).toNanos())
+    Assert.equal((try! Duration.parse("P2DT3H4M5.006S")).toNanos(),
+        Duration.ofDays(2L).plus(Duration.ofHours(3L)).plus(Duration.ofMinutes(4L)).plus(Duration.ofSeconds(5L)).plus(Duration.ofMillis(6L)).toNanos())
+    Assert.equal((try! Duration.parse("PT0S")).toNanos(), Duration.ZERO.toNanos())
+}
+
+export function testDurationParseRejectsInvalidFormats(): void {
+    Assert.isTrue(isFailure(Duration.parse("")))
+    Assert.isTrue(isFailure(Duration.parse("P")))
+    Assert.isTrue(isFailure(Duration.parse("PT")))
+    Assert.isTrue(isFailure(Duration.parse("P1M")))
+    Assert.isTrue(isFailure(Duration.parse("PT1M2H")))
+    Assert.isTrue(isFailure(Duration.parse("PT1.0000000000S")))
+    Assert.isTrue(isFailure(Duration.parse("PT1.S")))
 }
 
 // ─── Thread ──────────────────────────────────────────────────────────────────

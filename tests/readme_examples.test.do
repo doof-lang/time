@@ -10,7 +10,7 @@ export function testReadmeMeasureElapsedTimeAndDeadlines(): void {
     let maxPolls = timeout.toMillis() \ pollInterval.toMillis()
 
     Assert.equal(deadline.toEpochSeconds(), 1_030L)
-    Assert.equal(timeout.toISOString(), "PT0H0M30S")
+    Assert.equal(timeout.toISOString(), "PT30S")
     Assert.equal(pollInterval.toMillis(), 250L)
     Assert.equal(maxPolls, 120L)
 }
@@ -49,12 +49,14 @@ export function testReadmeParseInputAndInspectTimezoneRules(): void {
     let launchDate = try! Date.parse("2026-04-21")
     let publishedAt = try! Instant.parse("2026-04-21T14:00:00Z")
     let reviewSlot = try! DateTime.parse("2026-04-21T16:30:00")
+    let timeout = try! Duration.parse("PT30S")
 
     let sydney = try! TimeZone.lookup("Australia/Sydney")
     let offsetSeconds = sydney.offsetSecondsAt(publishedAt)
 
     Assert.equal(launchDate.dayOfYear(), 111)
     Assert.equal(reviewSlot.toInstant(sydney).toISOString(), "2026-04-21T06:30:00Z")
+    Assert.equal(timeout.toISOString(), "PT30S")
     Assert.equal(offsetSeconds, 36000)
     Assert.isFalse(sydney.isDSTAt(publishedAt))
 }
