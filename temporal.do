@@ -57,6 +57,46 @@ export class Instant "A point in UTC time with nanosecond precision." {
 
     // Returns ISO 8601 UTC string, e.g. "2024-06-01T12:00:00.123456789Z"
     toISOString(): string => _formatInstant(epochNanos)
+
+    // Parses an HTTP IMF-fixdate string, e.g. "Thu, 01 Jan 1970 00:00:00 GMT".
+    static parseHttpDate(s: string): Result<Instant, string> {
+        if s.length != 29 {
+            return Failure { error: "HTTP date must use IMF-fixdate format" }
+        }
+        if s.substring(3, 5) != ", " || s.charAt(7) != ' ' || s.charAt(11) != ' ' ||
+           s.charAt(16) != ' ' || s.charAt(19) != ':' || s.charAt(22) != ':' ||
+           s.slice(25) != " GMT" {
+            return Failure { error: "HTTP date must use IMF-fixdate format" }
+        }
+
+        day := try? int.parse(s.substring(5, 7)) else {
+            return Failure { error: "HTTP date day is invalid" }
+        }
+        month := httpMonthNumber(s.substring(8, 11)) else {
+            return Failure { error: "HTTP date month is invalid" }
+        }
+        year := try? int.parse(s.substring(12, 16)) else {
+            return Failure { error: "HTTP date year is invalid" }
+        }
+        hour := try? int.parse(s.substring(17, 19)) else {
+            return Failure { error: "HTTP date hour is invalid" }
+        }
+        minute := try? int.parse(s.substring(20, 22)) else {
+            return Failure { error: "HTTP date minute is invalid" }
+        }
+        second := try? int.parse(s.substring(23, 25)) else {
+            return Failure { error: "HTTP date second is invalid" }
+        }
+        try date := Date.create(year, month, day)
+        try time := Time.create(hour, minute, second)
+        return Success { value: DateTime.create(date, time).toInstantUTC() }
+    }
+
+    // Returns an HTTP IMF-fixdate string, e.g. "Thu, 01 Jan 1970 00:00:00 GMT".
+    toHttpDate(): string {
+        dateTime := this.toDateTime()
+        return "${httpWeekdayName(dateTime.date.dayOfWeek())}, ${string(dateTime.date.day).padStart(2, '0')} ${httpMonthName(dateTime.date.month)} ${string(dateTime.date.year).padStart(4, '0')} ${string(dateTime.time.hour).padStart(2, '0')}:${string(dateTime.time.minute).padStart(2, '0')}:${string(dateTime.time.second).padStart(2, '0')} GMT"
+    }
 }
 
 export class Date "A calendar date (year, month, day) with no time-of-day or timezone." {
@@ -334,6 +374,54 @@ export enum Month {
     October = 10,
     November = 11,
     December = 12
+}
+
+function httpWeekdayName(day: DayOfWeek): string {
+    return case day {
+        DayOfWeek.Monday -> "Mon",
+        DayOfWeek.Tuesday -> "Tue",
+        DayOfWeek.Wednesday -> "Wed",
+        DayOfWeek.Thursday -> "Thu",
+        DayOfWeek.Friday -> "Fri",
+        DayOfWeek.Saturday -> "Sat",
+        DayOfWeek.Sunday -> "Sun",
+    }
+}
+
+function httpMonthName(month: int): string {
+    return case month {
+        Month.January.value -> "Jan",
+        Month.February.value -> "Feb",
+        Month.March.value -> "Mar",
+        Month.April.value -> "Apr",
+        Month.May.value -> "May",
+        Month.June.value -> "Jun",
+        Month.July.value -> "Jul",
+        Month.August.value -> "Aug",
+        Month.September.value -> "Sep",
+        Month.October.value -> "Oct",
+        Month.November.value -> "Nov",
+        Month.December.value -> "Dec",
+        _ -> "Jan",
+    }
+}
+
+function httpMonthNumber(text: string): int | null {
+    return case text {
+        "Jan" -> Month.January.value,
+        "Feb" -> Month.February.value,
+        "Mar" -> Month.March.value,
+        "Apr" -> Month.April.value,
+        "May" -> Month.May.value,
+        "Jun" -> Month.June.value,
+        "Jul" -> Month.July.value,
+        "Aug" -> Month.August.value,
+        "Sep" -> Month.September.value,
+        "Oct" -> Month.October.value,
+        "Nov" -> Month.November.value,
+        "Dec" -> Month.December.value,
+        _ -> null,
+    }
 }
 
 import function _systemNanosEpoch(): long from "doof_time.hpp" as doof_time::system_nanos_epoch

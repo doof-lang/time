@@ -234,6 +234,23 @@ export function testInstantParse(): void {
     Assert.equal(instant.toEpochSeconds(), 0L)
 }
 
+export function testInstantHttpDateFormatting(): void {
+    Assert.equal(Instant.EPOCH.toHttpDate(), "Thu, 01 Jan 1970 00:00:00 GMT")
+    Assert.equal(Instant.ofEpochSeconds(784111777L).toHttpDate(), "Sun, 06 Nov 1994 08:49:37 GMT")
+}
+
+export function testInstantHttpDateParsing(): void {
+    instant := try! Instant.parseHttpDate("Sun, 06 Nov 1994 08:49:37 GMT")
+
+    Assert.equal(instant.toEpochSeconds(), 784111777L)
+}
+
+export function testInstantHttpDateParsingRejectsInvalidValues(): void {
+    Assert.isTrue(isFailure(Instant.parseHttpDate("Sun, 06 Foo 1994 08:49:37 GMT")))
+    Assert.isTrue(isFailure(Instant.parseHttpDate("Sun, 06 Nov 1994 08:49:60 GMT")))
+    Assert.isTrue(isFailure(Instant.parseHttpDate("1994-11-06T08:49:37Z")))
+}
+
 export function testInstantNow(): void {
     let before = Instant.ofEpochSeconds(0L)
     let now = Instant.now()

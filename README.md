@@ -105,6 +105,7 @@ import { Date, DateTime, Duration, Instant, TimeZone } from "std/time"
 
 launchDate := try! Date.parse("2026-04-21")
 publishedAt := try! Instant.parse("2026-04-21T14:00:00Z")
+servedAt := try! Instant.parseHttpDate("Tue, 21 Apr 2026 14:00:00 GMT")
 reviewSlot := try! DateTime.parse("2026-04-21T16:30:00")
 timeout := try! Duration.parse("PT30S")
 
@@ -113,6 +114,7 @@ offsetSeconds := sydney.offsetSecondsAt(publishedAt)
 
 println(launchDate.dayOfYear())
 println(reviewSlot.toInstant(sydney).toISOString())
+println(servedAt.toHttpDate())
 println("Timeout: ${timeout.toISOString()}")
 println("UTC offset: ${offsetSeconds} seconds")
 println("DST active: ${sydney.isDSTAt(publishedAt)}")
@@ -128,7 +130,7 @@ Signed elapsed time with nanosecond precision. Use unit constructors like `ofSec
 
 ### `Instant`
 
-UTC timestamp stored as nanoseconds since the Unix epoch. Supports clock reads with `now()`, parsing from RFC 3339 strings, arithmetic with `Duration`, and conversion to `DateTime` or `ZonedDateTime`.
+UTC timestamp stored as nanoseconds since the Unix epoch. Supports clock reads with `now()`, parsing from RFC 3339 strings and HTTP IMF-fixdate strings, arithmetic with `Duration`, and conversion to `DateTime` or `ZonedDateTime`.
 
 ### `Thread`
 
