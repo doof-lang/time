@@ -2,6 +2,11 @@
 
 Date, time, duration, and timezone handling for Doof. The package provides UTC instants, timezone-free calendar and clock types, and IANA timezone conversion through the platform time database.
 
+## Documentation
+
+- [Guide and API reference](docs/API.md) explains durations, instants, calendar types, time zones, formatting/parsing, sleeping, and stopwatch metrics.
+- Tests can be run with `doof test time`.
+
 ## Examples
 
 ### Measure elapsed time and deadlines
