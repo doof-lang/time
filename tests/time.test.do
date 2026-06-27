@@ -35,25 +35,32 @@ function assertTimerFailure(result: Result<Duration, TimerError>, name: string):
 
 export function testDurationOfUnits(): void {
     Assert.equal(Duration.ofSeconds(1L).toMillis(), 1000L)
-    Assert.equal(Duration.ofMinutes(2L).toSeconds(), 120L)
-    Assert.equal(Duration.ofHours(1L).toMinutes(), 60L)
-    Assert.equal(Duration.ofDays(1L).toHours(), 24L)
+    Assert.equal(Duration.ofMinutes(2L).toSeconds(), 120.0)
+    Assert.equal(Duration.ofHours(1L).toMinutes(), 60.0)
+    Assert.equal(Duration.ofDays(1L).toHours(), 24.0)
     Assert.equal(Duration.ofMillis(500L).toNanos(), 500000000L)
+}
+
+export function testDurationFractionalUnits(): void {
+    Assert.equal(Duration.ofMillis(500L).toSeconds(), 0.5)
+    Assert.equal(Duration.ofSeconds(90L).toMinutes(), 1.5)
+    Assert.equal(Duration.ofMinutes(90L).toHours(), 1.5)
+    Assert.equal(Duration.ofHours(36L).toDays(), 1.5)
 }
 
 export function testDurationArithmetic(): void {
     let a = Duration.ofSeconds(10L)
     let b = Duration.ofSeconds(3L)
-    Assert.equal(a.plus(b).toSeconds(), 13L)
-    Assert.equal(a.minus(b).toSeconds(), 7L)
-    Assert.equal(a.multipliedBy(3L).toSeconds(), 30L)
-    Assert.equal(a.dividedBy(2L).toSeconds(), 5L)
+    Assert.equal(a.plus(b).toSeconds(), 13.0)
+    Assert.equal(a.minus(b).toSeconds(), 7.0)
+    Assert.equal(a.multipliedBy(3L).toSeconds(), 30.0)
+    Assert.equal(a.dividedBy(2L).toSeconds(), 5.0)
 }
 
 export function testDurationNegated(): void {
     let d = Duration.ofSeconds(5L)
     Assert.isTrue(d.negated().isNegative())
-    Assert.equal(d.negated().abs().toSeconds(), 5L)
+    Assert.equal(d.negated().abs().toSeconds(), 5.0)
 }
 
 export function testDurationZero(): void {
@@ -214,8 +221,8 @@ export function testInstantPlusMinus(): void {
 export function testInstantDuration(): void {
     let a = Instant.ofEpochSeconds(100L)
     let b = Instant.ofEpochSeconds(300L)
-    Assert.equal(a.durationUntil(b).toSeconds(), 200L)
-    Assert.equal(b.durationSince(a).toSeconds(), 200L)
+    Assert.equal(a.durationUntil(b).toSeconds(), 200.0)
+    Assert.equal(b.durationSince(a).toSeconds(), 200.0)
 }
 
 export function testInstantComparison(): void {

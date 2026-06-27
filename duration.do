@@ -24,10 +24,10 @@ export class Duration "A signed elapsed duration with nanosecond precision." {
     toNanos(): long => nanos
     toMicros(): long => nanos \ 1000L
     toMillis(): long => nanos \ 1000000L
-    toSeconds(): long => nanos \ 1000000000L
-    toMinutes(): long => nanos \ 60L \ 1000000000L
-    toHours(): long => nanos \ 3600L \ 1000000000L
-    toDays(): long => nanos \ 86400L \ 1000000000L
+    toSeconds(): double => double(nanos) / 1000000000.0
+    toMinutes(): double => double(nanos) / 60000000000.0
+    toHours(): double => double(nanos) / 3600000000000.0
+    toDays(): double => double(nanos) / 86400000000000.0
 
     isNegative(): bool => nanos < 0L
     isZero(): bool => nanos == 0L
