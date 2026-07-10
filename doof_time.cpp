@@ -316,74 +316,74 @@ bool validate_time_parts(int32_t hour, int32_t minute, int32_t second, int32_t n
 
 doof::Result<DatePtr, std::string> parse_date_parts(const std::string& text) {
     if (text.size() != 10 || text[4] != '-' || text[7] != '-') {
-        return doof::Result<DatePtr, std::string>::failure("Invalid date format");
+        return doof::Failure<std::string>{"Invalid date format"};
     }
 
     int32_t year = 0;
     int32_t month = 0;
     int32_t day = 0;
     if (!parse_fixed_digits(text, 0, 4, year) || !parse_fixed_digits(text, 5, 2, month) || !parse_fixed_digits(text, 8, 2, day)) {
-        return doof::Result<DatePtr, std::string>::failure("Invalid date format");
+        return doof::Failure<std::string>{"Invalid date format"};
     }
 
     std::string error;
     if (!validate_date_parts(year, month, day, error)) {
-        return doof::Result<DatePtr, std::string>::failure(error);
+        return doof::Failure<std::string>{error};
     }
 
-    return doof::Result<DatePtr, std::string>::success(make_date(year, month, day));
+    return doof::Success<DatePtr>{make_date(year, month, day)};
 }
 
 doof::Result<TimePtr, std::string> parse_time_parts(const std::string& text) {
     if (text.size() < 5 || text[2] != ':') {
-        return doof::Result<TimePtr, std::string>::failure("Invalid time format");
+        return doof::Failure<std::string>{"Invalid time format"};
     }
 
     int32_t hour = 0;
     int32_t minute = 0;
     if (!parse_fixed_digits(text, 0, 2, hour) || !parse_fixed_digits(text, 3, 2, minute)) {
-        return doof::Result<TimePtr, std::string>::failure("Invalid time format");
+        return doof::Failure<std::string>{"Invalid time format"};
     }
 
     int32_t second = 0;
     int32_t nanosecond = 0;
     if (text.size() > 5) {
         if (text.size() < 8 || text[5] != ':') {
-            return doof::Result<TimePtr, std::string>::failure("Invalid time format");
+            return doof::Failure<std::string>{"Invalid time format"};
         }
         if (!parse_fixed_digits(text, 6, 2, second)) {
-            return doof::Result<TimePtr, std::string>::failure("Invalid time format");
+            return doof::Failure<std::string>{"Invalid time format"};
         }
         if (text.size() > 8 && !parse_fractional_nanos(text, 8, nanosecond)) {
-            return doof::Result<TimePtr, std::string>::failure("Invalid time format");
+            return doof::Failure<std::string>{"Invalid time format"};
         }
     }
 
     std::string error;
     if (!validate_time_parts(hour, minute, second, nanosecond, error)) {
-        return doof::Result<TimePtr, std::string>::failure(error);
+        return doof::Failure<std::string>{error};
     }
 
-    return doof::Result<TimePtr, std::string>::success(make_time(hour, minute, second, nanosecond));
+    return doof::Success<TimePtr>{make_time(hour, minute, second, nanosecond)};
 }
 
 doof::Result<DateTimePtr, std::string> parse_datetime_parts(const std::string& text) {
     const std::size_t separator = text.find('T');
     if (separator == std::string::npos) {
-        return doof::Result<DateTimePtr, std::string>::failure("Invalid datetime format");
+        return doof::Failure<std::string>{"Invalid datetime format"};
     }
 
     const auto parsed_date = parse_date_parts(text.substr(0, separator));
-    if (parsed_date.isFailure()) {
-        return doof::Result<DateTimePtr, std::string>::failure(parsed_date.error());
+    if (doof::is_failure(parsed_date)) {
+        return doof::Failure<std::string>{doof::failure_error(parsed_date)};
     }
 
     const auto parsed_time = parse_time_parts(text.substr(separator + 1));
-    if (parsed_time.isFailure()) {
-        return doof::Result<DateTimePtr, std::string>::failure(parsed_time.error());
+    if (doof::is_failure(parsed_time)) {
+        return doof::Failure<std::string>{doof::failure_error(parsed_time)};
     }
 
-    return doof::Result<DateTimePtr, std::string>::success(make_datetime(parsed_date.value(), parsed_time.value()));
+    return doof::Success<DateTimePtr>{make_datetime(doof::success_value(parsed_date), doof::success_value(parsed_time))};
 }
 
 DatePtr add_days_to_date(int32_t year, int32_t month, int32_t day, int64_t delta_days) {
@@ -453,17 +453,15 @@ int64_t system_nanos_epoch() {
 
 doof::Result<std::shared_ptr<Instant>, std::string> parse_instant(const std::string& text) {
     if (text.empty() || text.back() != 'Z') {
-        return doof::Result<std::shared_ptr<Instant>, std::string>::failure("Instant must end with 'Z'");
+        return doof::Failure<std::string>{"Instant must end with 'Z'"};
     }
 
     const auto parsed = detail::parse_datetime_parts(text.substr(0, text.size() - 1));
-    if (parsed.isFailure()) {
-        return doof::Result<std::shared_ptr<Instant>, std::string>::failure(parsed.error());
+    if (doof::is_failure(parsed)) {
+        return doof::Failure<std::string>{doof::failure_error(parsed)};
     }
 
-    return doof::Result<std::shared_ptr<Instant>, std::string>::success(
-        detail::make_instant(detail::combine_datetime_utc(parsed.value()->date, parsed.value()->time))
-    );
+    return doof::Success<std::shared_ptr<Instant>>{detail::make_instant(detail::combine_datetime_utc(doof::success_value(parsed)->date, doof::success_value(parsed)->time))};
 }
 
 std::string format_instant(int64_t epoch_nanos) {
@@ -543,9 +541,9 @@ std::shared_ptr<ZonedDateTime> datetime_at_zone(std::shared_ptr<DateTime> dateTi
 doof::Result<std::shared_ptr<Date>, std::string> validate_date(int32_t year, int32_t month, int32_t day) {
     std::string error;
     if (!detail::validate_date_parts(year, month, day, error)) {
-        return doof::Result<std::shared_ptr<Date>, std::string>::failure(error);
+        return doof::Failure<std::string>{error};
     }
-    return doof::Result<std::shared_ptr<Date>, std::string>::success(detail::make_date(year, month, day));
+    return doof::Success<std::shared_ptr<Date>>{detail::make_date(year, month, day)};
 }
 
 doof::Result<std::shared_ptr<Date>, std::string> parse_date(const std::string& text) {
@@ -563,9 +561,9 @@ std::shared_ptr<Date> system_date_in_zone(std::shared_ptr<TimeZone> zone) {
 doof::Result<std::shared_ptr<Time>, std::string> validate_time(int32_t hour, int32_t minute, int32_t second, int32_t nanosecond) {
     std::string error;
     if (!detail::validate_time_parts(hour, minute, second, nanosecond, error)) {
-        return doof::Result<std::shared_ptr<Time>, std::string>::failure(error);
+        return doof::Failure<std::string>{error};
     }
-    return doof::Result<std::shared_ptr<Time>, std::string>::success(detail::make_time(hour, minute, second, nanosecond));
+    return doof::Success<std::shared_ptr<Time>>{detail::make_time(hour, minute, second, nanosecond)};
 }
 
 doof::Result<std::shared_ptr<Time>, std::string> parse_time(const std::string& text) {
@@ -639,9 +637,9 @@ std::shared_ptr<DateTime> datetime_plus_nanos(std::shared_ptr<Date> date, std::s
 
 doof::Result<std::shared_ptr<TimeZone>, std::string> lookup_timezone(const std::string& id) {
     if (!detail::is_valid_zone_id(id) || !detail::zone_file_exists(id)) {
-        return doof::Result<std::shared_ptr<TimeZone>, std::string>::failure("Unknown timezone: " + id);
+        return doof::Failure<std::string>{"Unknown timezone: " + id};
     }
-    return doof::Result<std::shared_ptr<TimeZone>, std::string>::success(detail::make_timezone(id == "Etc/UTC" ? "UTC" : id));
+    return doof::Success<std::shared_ptr<TimeZone>>{detail::make_timezone(id == "Etc/UTC" ? "UTC" : id)};
 }
 
 std::shared_ptr<TimeZone> system_timezone() {
