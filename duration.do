@@ -244,4 +244,4 @@ export class Thread "Utilities for the current operating-system thread." {
     }
 }
 
-import function _threadSleepNanos(nanos: long): void from "doof_time.hpp" as doof_time::thread_sleep_nanos
+import isolated function _threadSleepNanos(nanos: long): void from "doof_time.hpp" as doof_time::thread_sleep_nanos

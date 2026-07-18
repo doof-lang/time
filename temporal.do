@@ -424,33 +424,33 @@ function httpMonthNumber(text: string): int | null {
     }
 }
 
-import function _systemNanosEpoch(): long from "doof_time.hpp" as doof_time::system_nanos_epoch
-import function _parseInstant(s: string): Result<Instant, string> from "doof_time.hpp" as doof_time::parse_instant
-import function _formatInstant(nanos: long): string from "doof_time.hpp" as doof_time::format_instant
-import function _instantToDateTime(nanos: long): DateTime from "doof_time.hpp" as doof_time::instant_to_datetime
-import function _instantToDateTimeInZone(nanos: long, zone: TimeZone): DateTime from "doof_time.hpp" as doof_time::instant_to_datetime_in_zone
-import function _instantToZonedDateTime(nanos: long, zone: TimeZone): ZonedDateTime from "doof_time.hpp" as doof_time::instant_to_zoned_datetime
-import function _dateTimeToInstant(date: Date, time: Time): Instant from "doof_time.hpp" as doof_time::datetime_to_instant
-import function _dateTimeToInstantInZone(date: Date, time: Time, zone: TimeZone): Instant from "doof_time.hpp" as doof_time::datetime_to_instant_in_zone
-import function _dateTimeAtZone(dateTime: DateTime, zone: TimeZone): ZonedDateTime from "doof_time.hpp" as doof_time::datetime_at_zone
-import function _validateDate(year: int, month: int, day: int): Result<Date, string> from "doof_time.hpp" as doof_time::validate_date
-import function _parseDate(s: string): Result<Date, string> from "doof_time.hpp" as doof_time::parse_date
-import function _systemDateUTC(): Date from "doof_time.hpp" as doof_time::system_date_utc
-import function _systemDateInZone(zone: TimeZone): Date from "doof_time.hpp" as doof_time::system_date_in_zone
-import function _validateTime(hour: int, minute: int, second: int, nanosecond: int): Result<Time, string> from "doof_time.hpp" as doof_time::validate_time
-import function _parseTime(s: string): Result<Time, string> from "doof_time.hpp" as doof_time::parse_time
-import function _parseDateTime(s: string): Result<DateTime, string> from "doof_time.hpp" as doof_time::parse_datetime
-import function _dateToDayOfWeek(year: int, month: int, day: int): DayOfWeek from "doof_time.hpp" as doof_time::date_to_day_of_week
-import function _dateToDayOfYear(year: int, month: int, day: int): int from "doof_time.hpp" as doof_time::date_to_day_of_year
-import function _isLeapYear(year: int): bool from "doof_time.hpp" as doof_time::is_leap_year
-import function _daysInMonth(year: int, month: int): int from "doof_time.hpp" as doof_time::days_in_month
-import function _dateAddDays(year: int, month: int, day: int, n: int): Date from "doof_time.hpp" as doof_time::date_add_days
-import function _dateAddMonths(year: int, month: int, day: int, n: int): Date from "doof_time.hpp" as doof_time::date_add_months
-import function _dateAddYears(year: int, month: int, day: int, n: int): Date from "doof_time.hpp" as doof_time::date_add_years
-import function _dateDiff(y1: int, m1: int, d1: int, y2: int, m2: int, d2: int): int from "doof_time.hpp" as doof_time::date_diff
-import function _timeAddNanos(hour: int, minute: int, second: int, nanosecond: int, nanos: long): Time from "doof_time.hpp" as doof_time::time_add_nanos
-import function _dateTimePlusNanos(date: Date, time: Time, nanos: long): DateTime from "doof_time.hpp" as doof_time::datetime_plus_nanos
-import function _lookupTimeZone(id: string): Result<TimeZone, string> from "doof_time.hpp" as doof_time::lookup_timezone
-import function _systemTimeZone(): TimeZone from "doof_time.hpp" as doof_time::system_timezone
-import function _zoneOffsetAt(id: string, epochSeconds: long): int from "doof_time.hpp" as doof_time::zone_offset_at
-import function _zoneDSTAt(id: string, epochSeconds: long): bool from "doof_time.hpp" as doof_time::zone_dst_at
+import isolated function _systemNanosEpoch(): long from "doof_time.hpp" as doof_time::system_nanos_epoch
+import isolated function _parseInstant(s: string): Result<Instant, string> from "doof_time.hpp" as doof_time::parse_instant
+import isolated function _formatInstant(nanos: long): string from "doof_time.hpp" as doof_time::format_instant
+import isolated function _instantToDateTime(nanos: long): DateTime from "doof_time.hpp" as doof_time::instant_to_datetime
+import isolated function _instantToDateTimeInZone(nanos: long, zone: TimeZone): DateTime from "doof_time.hpp" as doof_time::instant_to_datetime_in_zone
+import isolated function _instantToZonedDateTime(nanos: long, zone: TimeZone): ZonedDateTime from "doof_time.hpp" as doof_time::instant_to_zoned_datetime
+import isolated function _dateTimeToInstant(date: Date, time: Time): Instant from "doof_time.hpp" as doof_time::datetime_to_instant
+import isolated function _dateTimeToInstantInZone(date: Date, time: Time, zone: TimeZone): Instant from "doof_time.hpp" as doof_time::datetime_to_instant_in_zone
+import isolated function _dateTimeAtZone(dateTime: DateTime, zone: TimeZone): ZonedDateTime from "doof_time.hpp" as doof_time::datetime_at_zone
+import isolated function _validateDate(year: int, month: int, day: int): Result<Date, string> from "doof_time.hpp" as doof_time::validate_date
+import isolated function _parseDate(s: string): Result<Date, string> from "doof_time.hpp" as doof_time::parse_date
+import isolated function _systemDateUTC(): Date from "doof_time.hpp" as doof_time::system_date_utc
+import isolated function _systemDateInZone(zone: TimeZone): Date from "doof_time.hpp" as doof_time::system_date_in_zone
+import isolated function _validateTime(hour: int, minute: int, second: int, nanosecond: int): Result<Time, string> from "doof_time.hpp" as doof_time::validate_time
+import isolated function _parseTime(s: string): Result<Time, string> from "doof_time.hpp" as doof_time::parse_time
+import isolated function _parseDateTime(s: string): Result<DateTime, string> from "doof_time.hpp" as doof_time::parse_datetime
+import isolated function _dateToDayOfWeek(year: int, month: int, day: int): DayOfWeek from "doof_time.hpp" as doof_time::date_to_day_of_week
+import isolated function _dateToDayOfYear(year: int, month: int, day: int): int from "doof_time.hpp" as doof_time::date_to_day_of_year
+import isolated function _isLeapYear(year: int): bool from "doof_time.hpp" as doof_time::is_leap_year
+import isolated function _daysInMonth(year: int, month: int): int from "doof_time.hpp" as doof_time::days_in_month
+import isolated function _dateAddDays(year: int, month: int, day: int, n: int): Date from "doof_time.hpp" as doof_time::date_add_days
+import isolated function _dateAddMonths(year: int, month: int, day: int, n: int): Date from "doof_time.hpp" as doof_time::date_add_months
+import isolated function _dateAddYears(year: int, month: int, day: int, n: int): Date from "doof_time.hpp" as doof_time::date_add_years
+import isolated function _dateDiff(y1: int, m1: int, d1: int, y2: int, m2: int, d2: int): int from "doof_time.hpp" as doof_time::date_diff
+import isolated function _timeAddNanos(hour: int, minute: int, second: int, nanosecond: int, nanos: long): Time from "doof_time.hpp" as doof_time::time_add_nanos
+import isolated function _dateTimePlusNanos(date: Date, time: Time, nanos: long): DateTime from "doof_time.hpp" as doof_time::datetime_plus_nanos
+import isolated function _lookupTimeZone(id: string): Result<TimeZone, string> from "doof_time.hpp" as doof_time::lookup_timezone
+import isolated function _systemTimeZone(): TimeZone from "doof_time.hpp" as doof_time::system_timezone
+import isolated function _zoneOffsetAt(id: string, epochSeconds: long): int from "doof_time.hpp" as doof_time::zone_offset_at
+import isolated function _zoneDSTAt(id: string, epochSeconds: long): bool from "doof_time.hpp" as doof_time::zone_dst_at
