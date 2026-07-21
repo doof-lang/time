@@ -28,7 +28,7 @@ class TimerBucket {
     maxNanos: long = 0L
     durations: long[] = []
 
-    record(duration: Duration): void {
+    record(duration: Duration): none {
         let nanos = duration.toNanos()
         if count == 0 {
             minNanos = nanos
@@ -53,7 +53,7 @@ class TimerBucket {
         return Duration.ofNanos(durations[index])
     }
 
-    private insertSorted(nanos: long): void {
+    private insertSorted(nanos: long): none {
         durations.push(nanos)
         let index = durations.length - 1
 
@@ -127,7 +127,7 @@ export class Stopwatch {
         }
     }
 
-    private record(name: string, duration: Duration): void {
+    private record(name: string, duration: Duration) {
         let bucket = bucketFor(name) ?? TimerBucket {}
         if !timers.has(name) {
             timers.set(name, bucket)
@@ -135,10 +135,10 @@ export class Stopwatch {
         bucket.record(duration)
     }
 
-    private bucketFor(name: string): TimerBucket | null {
+    private bucketFor(name: string): TimerBucket | none {
         return case timers.get(name) {
             s: Success -> s.value,
-            _: Failure -> null
+            _: Failure -> none
         }
     }
 
@@ -155,7 +155,7 @@ export class StopwatchSpan {
     readonly name: string
     readonly startedAt: Instant
     private finished: bool = false
-    private finishedDuration: Duration | null = null
+    private finishedDuration: Duration | none = none
 
     finish(): Duration {
         if finished {

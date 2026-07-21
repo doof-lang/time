@@ -1,7 +1,7 @@
 import { Assert } from "std/assert"
 import { Date, DateTime, Duration, Instant, Stopwatch, Thread, Time, TimeZone, Month, DayOfWeek } from "../index"
 
-export function testReadmeMeasureElapsedTimeAndDeadlines(): void {
+export function testReadmeMeasureElapsedTimeAndDeadlines(): none {
     let startedAt = Instant.ofEpochSeconds(1_000L)
     let timeout = Duration.ofSeconds(30L)
     let deadline = startedAt.plus(timeout)
@@ -15,7 +15,7 @@ export function testReadmeMeasureElapsedTimeAndDeadlines(): void {
     Assert.equal(maxPolls, 120L)
 }
 
-export function testReadmeBuildCalendarValuesAndMoveThemAroundSafely(): void {
+export function testReadmeBuildCalendarValuesAndMoveThemAroundSafely(): none {
     let payrollDate = try! Date.create(2024, Month.January.value, 31)
     let nextPayrollDate = payrollDate.plusMonths(1)
 
@@ -29,7 +29,7 @@ export function testReadmeBuildCalendarValuesAndMoveThemAroundSafely(): void {
     Assert.equal(releaseWindow.toISOString(), "2024-02-29T10:05:00")
 }
 
-export function testReadmeConvertTheSameMeetingBetweenTimeZones(): void {
+export function testReadmeConvertTheSameMeetingBetweenTimeZones(): none {
     let newYork = try! TimeZone.lookup("America/New_York")
     let london = try! TimeZone.lookup("Europe/London")
     let tokyo = try! TimeZone.lookup("Asia/Tokyo")
@@ -45,7 +45,7 @@ export function testReadmeConvertTheSameMeetingBetweenTimeZones(): void {
     Assert.equal(sameWallClockInTokyo.toISOString(), "2024-10-04T09:30:00+09:00")
 }
 
-export function testReadmeParseInputAndInspectTimezoneRules(): void {
+export function testReadmeParseInputAndInspectTimezoneRules(): none {
     let launchDate = try! Date.parse("2026-04-21")
     let publishedAt = try! Instant.parse("2026-04-21T14:00:00Z")
     let reviewSlot = try! DateTime.parse("2026-04-21T16:30:00")
@@ -61,7 +61,7 @@ export function testReadmeParseInputAndInspectTimezoneRules(): void {
     Assert.isFalse(sydney.isDSTAt(publishedAt))
 }
 
-export function testReadmeCollectTimingsWithStopwatch(): void {
+export function testReadmeCollectTimingsWithStopwatch(): none {
     sw := Stopwatch()
 
     with span := sw.measure("parse") {

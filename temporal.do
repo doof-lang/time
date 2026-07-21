@@ -5,7 +5,7 @@ export class Instant "A point in UTC time with nanosecond precision." {
     // Negative values represent instants before the epoch.
     private readonly epochNanos: long
 
-    // ── Static constructors ──────────────────────────────────────────────────
+    // ââ Static constructors ââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     // Returns the current instant using the system clock.
     static now(): Instant {
@@ -23,20 +23,20 @@ export class Instant "A point in UTC time with nanosecond precision." {
 
     static readonly EPOCH = Instant { epochNanos: 0L }
 
-    // ── Accessors ────────────────────────────────────────────────────────────
+    // ââ Accessors ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     toEpochNanos(): long => epochNanos
     toEpochMillis(): long => epochNanos \ 1000000L
     toEpochSeconds(): long => epochNanos \ 1000000000L
 
-    // ── Arithmetic ───────────────────────────────────────────────────────────
+    // ââ Arithmetic âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     plus(d: Duration): Instant => Instant { epochNanos: epochNanos + d.toNanos() }
     minus(d: Duration): Instant => Instant { epochNanos: epochNanos - d.toNanos() }
     durationUntil(other: Instant): Duration => Duration.ofNanos(other.epochNanos - epochNanos)
     durationSince(other: Instant): Duration => Duration.ofNanos(epochNanos - other.epochNanos)
 
-    // ── Comparison ───────────────────────────────────────────────────────────
+    // ââ Comparison âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     compareTo(other: Instant): int {
         if epochNanos < other.epochNanos { return -1 }
@@ -48,12 +48,12 @@ export class Instant "A point in UTC time with nanosecond precision." {
     isAfter(other: Instant): bool => epochNanos > other.epochNanos
     equals(other: Instant): bool => epochNanos == other.epochNanos
 
-    // ── Conversion ───────────────────────────────────────────────────────────
+    // ââ Conversion âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     toDateTime(): DateTime => _instantToDateTime(epochNanos)
     toZonedDateTime(zone: TimeZone): ZonedDateTime => _instantToZonedDateTime(epochNanos, zone)
 
-    // ── Formatting ───────────────────────────────────────────────────────────
+    // ââ Formatting âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     // Returns ISO 8601 UTC string, e.g. "2024-06-01T12:00:00.123456789Z"
     toISOString(): string => _formatInstant(epochNanos)
@@ -104,7 +104,7 @@ export class Date "A calendar date (year, month, day) with no time-of-day or tim
     readonly month: int   // 1-12
     readonly day: int     // 1-31
 
-    // ── Static constructors ──────────────────────────────────────────────────
+    // ââ Static constructors ââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     static create(year: int, month: int, day: int): Result<Date, string> {
         return _validateDate(year, month, day)
@@ -124,14 +124,14 @@ export class Date "A calendar date (year, month, day) with no time-of-day or tim
     static readonly MIN = Date { year: 1, month: 1, day: 1 }
     static readonly MAX = Date { year: 9999, month: 12, day: 31 }
 
-    // ── Derived properties ───────────────────────────────────────────────────
+    // ââ Derived properties âââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     dayOfWeek(): DayOfWeek => _dateToDayOfWeek(year, month, day)
     dayOfYear(): int => _dateToDayOfYear(year, month, day)
     isLeapYear(): bool => _isLeapYear(year)
     daysInMonth(): int => _daysInMonth(year, month)
 
-    // ── Arithmetic ───────────────────────────────────────────────────────────
+    // ââ Arithmetic âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     plusDays(n: int): Date => _dateAddDays(year, month, day, n)
     minusDays(n: int): Date => _dateAddDays(year, month, day, -n)
@@ -143,7 +143,7 @@ export class Date "A calendar date (year, month, day) with no time-of-day or tim
     // Returns the number of days from this date to the other (may be negative).
     daysUntil(other: Date): int => _dateDiff(year, month, day, other.year, other.month, other.day)
 
-    // ── Comparison ───────────────────────────────────────────────────────────
+    // ââ Comparison âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     compareTo(other: Date): int {
         if year != other.year { return if year < other.year then -1 else 1 }
@@ -156,7 +156,7 @@ export class Date "A calendar date (year, month, day) with no time-of-day or tim
     isAfter(other: Date): bool => this.compareTo(other) > 0
     equals(other: Date): bool => year == other.year && month == other.month && day == other.day
 
-    // ── Formatting ───────────────────────────────────────────────────────────
+    // ââ Formatting âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     // Returns ISO 8601 date string, e.g. "2024-06-01"
     toISOString(): string =>
@@ -169,7 +169,7 @@ export class Time "A time-of-day with nanosecond precision. No date or timezone.
     readonly second: int       // 0-59
     readonly nanosecond: int   // 0-999_999_999
 
-    // ── Static constructors ──────────────────────────────────────────────────
+    // ââ Static constructors ââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     static create(hour: int, minute: int, second: int = 0, nanosecond: int = 0): Result<Time, string> {
         return _validateTime(hour, minute, second, nanosecond)
@@ -183,14 +183,14 @@ export class Time "A time-of-day with nanosecond precision. No date or timezone.
     static readonly MIDNIGHT = Time { hour: 0, minute: 0, second: 0, nanosecond: 0 }
     static readonly NOON = Time { hour: 12, minute: 0, second: 0, nanosecond: 0 }
 
-    // ── Arithmetic ───────────────────────────────────────────────────────────
+    // ââ Arithmetic âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     plusHours(n: int): Time => _timeAddNanos(hour, minute, second, nanosecond, long(n) * 3600000000000L)
     plusMinutes(n: int): Time => _timeAddNanos(hour, minute, second, nanosecond, long(n) * 60000000000L)
     plusSeconds(n: int): Time => _timeAddNanos(hour, minute, second, nanosecond, long(n) * 1000000000L)
     plusNanos(n: long): Time => _timeAddNanos(hour, minute, second, nanosecond, n)
 
-    // ── Comparison ───────────────────────────────────────────────────────────
+    // ââ Comparison âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     compareTo(other: Time): int {
         if hour != other.hour { return if hour < other.hour then -1 else 1 }
@@ -206,7 +206,7 @@ export class Time "A time-of-day with nanosecond precision. No date or timezone.
         hour == other.hour && minute == other.minute &&
         second == other.second && nanosecond == other.nanosecond
 
-    // ── Formatting ───────────────────────────────────────────────────────────
+    // ââ Formatting âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     // Returns "HH:MM:SS" or "HH:MM:SS.nnnnnnnnn" (trailing zeros trimmed)
     toISOString(): string {
@@ -220,7 +220,7 @@ export class DateTime "A combined calendar date and time-of-day. No timezone." {
     readonly date: Date
     readonly time: Time
 
-    // ── Static constructors ──────────────────────────────────────────────────
+    // ââ Static constructors ââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     static create(date: Date, time: Time): DateTime => DateTime { date, time }
 
@@ -240,7 +240,7 @@ export class DateTime "A combined calendar date and time-of-day. No timezone." {
         return _parseDateTime(s)
     }
 
-    // ── Arithmetic ───────────────────────────────────────────────────────────
+    // ââ Arithmetic âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     plusDays(n: int): DateTime => DateTime { date: date.plusDays(n), time }
     minusDays(n: int): DateTime => DateTime { date: date.minusDays(n), time }
@@ -250,7 +250,7 @@ export class DateTime "A combined calendar date and time-of-day. No timezone." {
     plus(d: Duration): DateTime => _dateTimePlusNanos(date, time, d.toNanos())
     minus(d: Duration): DateTime => _dateTimePlusNanos(date, time, -d.toNanos())
 
-    // ── Conversion ───────────────────────────────────────────────────────────
+    // ââ Conversion âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     // Interprets this DateTime as UTC and returns the corresponding Instant.
     toInstantUTC(): Instant => _dateTimeToInstant(date, time)
@@ -260,7 +260,7 @@ export class DateTime "A combined calendar date and time-of-day. No timezone." {
 
     atZone(zone: TimeZone): ZonedDateTime => _dateTimeAtZone(this, zone)
 
-    // ── Comparison ───────────────────────────────────────────────────────────
+    // ââ Comparison âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     compareTo(other: DateTime): int {
         let dc = date.compareTo(other.date)
@@ -272,7 +272,7 @@ export class DateTime "A combined calendar date and time-of-day. No timezone." {
     isAfter(other: DateTime): bool => this.compareTo(other) > 0
     equals(other: DateTime): bool => date.equals(other.date) && time.equals(other.time)
 
-    // ── Formatting ───────────────────────────────────────────────────────────
+    // ââ Formatting âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     // Returns ISO 8601 string, e.g. "2024-06-01T12:30:00"
     toISOString(): string => "${date.toISOString()}T${time.toISOString()}"
@@ -281,7 +281,7 @@ export class DateTime "A combined calendar date and time-of-day. No timezone." {
 export class TimeZone "An IANA timezone identifier (e.g. \"America/New_York\", \"UTC\")." {
     readonly id: string
 
-    // ── Static constructors ──────────────────────────────────────────────────
+    // ââ Static constructors ââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     // Returns a timezone for the given IANA identifier, or Failure if unknown.
     static lookup(id: string): Result<TimeZone, string> => _lookupTimeZone(id)
@@ -291,7 +291,7 @@ export class TimeZone "An IANA timezone identifier (e.g. \"America/New_York\", \
     // Returns the system's local timezone.
     static local(): TimeZone => _systemTimeZone()
 
-    // ── Queries ──────────────────────────────────────────────────────────────
+    // ââ Queries ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     // UTC offset in seconds at the given instant (accounts for DST).
     offsetSecondsAt(instant: Instant): int => _zoneOffsetAt(id, instant.toEpochSeconds())
@@ -304,18 +304,18 @@ export class ZonedDateTime "A DateTime with an explicit TimeZone." {
     readonly dateTime: DateTime
     readonly zone: TimeZone
 
-    // ── Static constructors ──────────────────────────────────────────────────
+    // ââ Static constructors ââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     static now(zone: TimeZone): ZonedDateTime => Instant.now().toZonedDateTime(zone)
     static nowUTC(): ZonedDateTime => Instant.now().toZonedDateTime(TimeZone.UTC)
 
-    // ── Derived properties ───────────────────────────────────────────────────
+    // ââ Derived properties âââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     date(): Date => dateTime.date
     time(): Time => dateTime.time
     offsetSeconds(): int => zone.offsetSecondsAt(this.toInstant())
 
-    // ── Conversion ───────────────────────────────────────────────────────────
+    // ââ Conversion âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     toInstant(): Instant => dateTime.toInstant(zone)
     withZoneSameInstant(newZone: TimeZone): ZonedDateTime =>
@@ -325,7 +325,7 @@ export class ZonedDateTime "A DateTime with an explicit TimeZone." {
     toDateTime(): DateTime => dateTime
     toUTC(): ZonedDateTime => this.withZoneSameInstant(TimeZone.UTC)
 
-    // ── Comparison ───────────────────────────────────────────────────────────
+    // ââ Comparison âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     compareTo(other: ZonedDateTime): int =>
         this.toInstant().compareTo(other.toInstant())
@@ -333,7 +333,7 @@ export class ZonedDateTime "A DateTime with an explicit TimeZone." {
     isBefore(other: ZonedDateTime): bool => this.toInstant().isBefore(other.toInstant())
     isAfter(other: ZonedDateTime): bool => this.toInstant().isAfter(other.toInstant())
 
-    // ── Formatting ───────────────────────────────────────────────────────────
+    // ââ Formatting âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     // Returns ISO 8601 with offset, e.g. "2024-06-01T12:30:00+10:00" or "...Z"
     toISOString(): string {
@@ -406,7 +406,7 @@ function httpMonthName(month: int): string {
     }
 }
 
-function httpMonthNumber(text: string): int | null {
+function httpMonthNumber(text: string): int | none {
     return case text {
         "Jan" -> Month.January.value,
         "Feb" -> Month.February.value,
@@ -420,7 +420,7 @@ function httpMonthNumber(text: string): int | null {
         "Oct" -> Month.October.value,
         "Nov" -> Month.November.value,
         "Dec" -> Month.December.value,
-        _ -> null,
+        _ -> none,
     }
 }
 

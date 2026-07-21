@@ -2,7 +2,7 @@ export class Duration "A signed elapsed duration with nanosecond precision." {
     // Internal representation: total nanoseconds (may be negative)
     private readonly nanos: long
 
-    // ── Static constructors ──────────────────────────────────────────────────
+    // ââ Static constructors ââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     static ofNanos(n: long): Duration => Duration { nanos: n }
     static ofMicros(us: long): Duration => Duration { nanos: us * 1000L }
@@ -19,7 +19,7 @@ export class Duration "A signed elapsed duration with nanosecond precision." {
 
     static readonly ZERO = Duration { nanos: 0L }
 
-    // ── Accessors ────────────────────────────────────────────────────────────
+    // ââ Accessors ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     toNanos(): long => nanos
     toMicros(): long => nanos \ 1000L
@@ -34,14 +34,14 @@ export class Duration "A signed elapsed duration with nanosecond precision." {
     abs(): Duration => Duration { nanos: if nanos < 0L then -nanos else nanos }
     negated(): Duration => Duration { nanos: -nanos }
 
-    // ── Arithmetic ───────────────────────────────────────────────────────────
+    // ââ Arithmetic âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     plus(other: Duration): Duration => Duration { nanos: nanos + other.nanos }
     minus(other: Duration): Duration => Duration { nanos: nanos - other.nanos }
     multipliedBy(factor: long): Duration => Duration { nanos: nanos * factor }
     dividedBy(divisor: long): Duration => Duration { nanos: nanos \ divisor }
 
-    // ── Comparison ───────────────────────────────────────────────────────────
+    // ââ Comparison âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     compareTo(other: Duration): int {
         if nanos < other.nanos { return -1 }
@@ -53,7 +53,7 @@ export class Duration "A signed elapsed duration with nanosecond precision." {
     isGreaterThan(other: Duration): bool => nanos > other.nanos
     equals(other: Duration): bool => nanos == other.nanos
 
-    // ── Formatting ───────────────────────────────────────────────────────────
+    // ââ Formatting âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     // Returns ISO 8601 duration string, e.g. "PT3H25M10.5S" or "-PT5S"
     toISOString(): string {
@@ -239,9 +239,9 @@ function digitValue(c: char): int {
 export class Thread "Utilities for the current operating-system thread." {
     // Blocks the current thread for the given duration. Zero or negative
     // durations return immediately.
-    static sleep(duration: Duration): void {
+    static sleep(duration: Duration): none {
         _threadSleepNanos(duration.toNanos())
     }
 }
 
-import isolated function _threadSleepNanos(nanos: long): void from "doof_time.hpp" as doof_time::thread_sleep_nanos
+import isolated function _threadSleepNanos(nanos: long): none from "doof_time.hpp" as doof_time::thread_sleep_nanos

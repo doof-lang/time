@@ -20,7 +20,7 @@ function isFailure<T, E>(result: Result<T, E>): bool {
     }
 }
 
-function assertTimerFailure(result: Result<Duration, TimerError>, name: string): void {
+function assertTimerFailure(result: Result<Duration, TimerError>, name: string): none {
     case result {
         s: Success -> Assert.fail("expected timer lookup to fail")
         f: Failure -> {
@@ -31,9 +31,9 @@ function assertTimerFailure(result: Result<Duration, TimerError>, name: string):
     }
 }
 
-// ─── Duration ────────────────────────────────────────────────────────────────
+// âââ Duration ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-export function testDurationOfUnits(): void {
+export function testDurationOfUnits(): none {
     Assert.equal(Duration.ofSeconds(1L).toMillis(), 1000L)
     Assert.equal(Duration.ofMinutes(2L).toSeconds(), 120.0)
     Assert.equal(Duration.ofHours(1L).toMinutes(), 60.0)
@@ -41,14 +41,14 @@ export function testDurationOfUnits(): void {
     Assert.equal(Duration.ofMillis(500L).toNanos(), 500000000L)
 }
 
-export function testDurationFractionalUnits(): void {
+export function testDurationFractionalUnits(): none {
     Assert.equal(Duration.ofMillis(500L).toSeconds(), 0.5)
     Assert.equal(Duration.ofSeconds(90L).toMinutes(), 1.5)
     Assert.equal(Duration.ofMinutes(90L).toHours(), 1.5)
     Assert.equal(Duration.ofHours(36L).toDays(), 1.5)
 }
 
-export function testDurationArithmetic(): void {
+export function testDurationArithmetic(): none {
     let a = Duration.ofSeconds(10L)
     let b = Duration.ofSeconds(3L)
     Assert.equal(a.plus(b).toSeconds(), 13.0)
@@ -57,18 +57,18 @@ export function testDurationArithmetic(): void {
     Assert.equal(a.dividedBy(2L).toSeconds(), 5.0)
 }
 
-export function testDurationNegated(): void {
+export function testDurationNegated(): none {
     let d = Duration.ofSeconds(5L)
     Assert.isTrue(d.negated().isNegative())
     Assert.equal(d.negated().abs().toSeconds(), 5.0)
 }
 
-export function testDurationZero(): void {
+export function testDurationZero(): none {
     Assert.isTrue(Duration.ZERO.isZero())
     Assert.isFalse(Duration.ofSeconds(1L).isZero())
 }
 
-export function testDurationCompareTo(): void {
+export function testDurationCompareTo(): none {
     let short = Duration.ofSeconds(1L)
     let long_ = Duration.ofSeconds(5L)
     Assert.isTrue(short.isLessThan(long_))
@@ -76,7 +76,7 @@ export function testDurationCompareTo(): void {
     Assert.isTrue(short.equals(Duration.ofMillis(1000L)))
 }
 
-export function testDurationISOString(): void {
+export function testDurationISOString(): none {
     Assert.equal(Duration.ofHours(3L).plus(Duration.ofMinutes(25L)).plus(Duration.ofSeconds(10L)).toISOString(), "PT3H25M10S")
     Assert.equal(Duration.ofSeconds(5L).negated().toISOString(), "-PT5S")
     Assert.equal(Duration.ofMillis(250L).toISOString(), "PT0.25S")
@@ -84,7 +84,7 @@ export function testDurationISOString(): void {
     Assert.equal(Duration.ZERO.toISOString(), "PT0S")
 }
 
-export function testDurationParse(): void {
+export function testDurationParse(): none {
     Assert.equal((try! Duration.parse("PT5S")).toNanos(), Duration.ofSeconds(5L).toNanos())
     Assert.equal((try! Duration.parse("-PT5S")).toNanos(), Duration.ofSeconds(5L).negated().toNanos())
     Assert.equal((try! Duration.parse("PT0.25S")).toNanos(), Duration.ofMillis(250L).toNanos())
@@ -93,7 +93,7 @@ export function testDurationParse(): void {
     Assert.equal((try! Duration.parse("PT0S")).toNanos(), Duration.ZERO.toNanos())
 }
 
-export function testDurationParseRejectsInvalidFormats(): void {
+export function testDurationParseRejectsInvalidFormats(): none {
     Assert.isTrue(isFailure(Duration.parse("")))
     Assert.isTrue(isFailure(Duration.parse("P")))
     Assert.isTrue(isFailure(Duration.parse("PT")))
@@ -103,24 +103,24 @@ export function testDurationParseRejectsInvalidFormats(): void {
     Assert.isTrue(isFailure(Duration.parse("PT1.S")))
 }
 
-// ─── Thread ──────────────────────────────────────────────────────────────────
+// âââ Thread ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-export function testThreadSleepZeroAndNegativeDurationsReturn(): void {
+export function testThreadSleepZeroAndNegativeDurationsReturn(): none {
     Thread.sleep(Duration.ZERO)
     Thread.sleep(Duration.ofMillis(1L).negated())
     Assert.isTrue(true)
 }
 
-export function testThreadSleepDelaysCurrentThread(): void {
+export function testThreadSleepDelaysCurrentThread(): none {
     let startedAt = Instant.now()
     Thread.sleep(Duration.ofMillis(5L))
     let elapsed = startedAt.durationUntil(Instant.now())
     Assert.isTrue(elapsed.toMillis() >= 1L)
 }
 
-// ─── Stopwatch ───────────────────────────────────────────────────────────────
+// âââ Stopwatch âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-export function testStopwatchMissingTimer(): void {
+export function testStopwatchMissingTimer(): none {
     let sw = Stopwatch()
 
     Assert.equal(sw.count("missing"), 0)
@@ -131,7 +131,7 @@ export function testStopwatchMissingTimer(): void {
     assertTimerFailure(sw.p95("missing"), "missing")
 }
 
-export function testStopwatchManualFinishRecordsOnce(): void {
+export function testStopwatchManualFinishRecordsOnce(): none {
     let sw = Stopwatch()
     let span = sw.measure("manual")
 
@@ -144,7 +144,7 @@ export function testStopwatchManualFinishRecordsOnce(): void {
     Assert.equal((try! sw.total("manual")).toNanos(), first.toNanos())
 }
 
-export function testStopwatchScopedMeasureRecordsOnExit(): void {
+export function testStopwatchScopedMeasureRecordsOnExit(): none {
     let sw = Stopwatch()
 
     with span := sw.measure("scoped") {
@@ -155,7 +155,7 @@ export function testStopwatchScopedMeasureRecordsOnExit(): void {
     Assert.isTrue((try! sw.total("scoped")).toNanos() >= 0L)
 }
 
-export function testStopwatchAggregatesAndP95(): void {
+export function testStopwatchAggregatesAndP95(): none {
     let sw = Stopwatch()
 
     first := sw.measure("task")
@@ -179,7 +179,7 @@ export function testStopwatchAggregatesAndP95(): void {
     Assert.equal(p95.toNanos(), max.toNanos())
 }
 
-export function testStopwatchSummary(): void {
+export function testStopwatchSummary(): none {
     let sw = Stopwatch()
 
     a := sw.measure("parse")
@@ -201,15 +201,15 @@ export function testStopwatchSummary(): void {
     Assert.equal(summary.entries[1].total.toNanos(), renderDuration.toNanos())
 }
 
-// ─── Instant ─────────────────────────────────────────────────────────────────
+// âââ Instant âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-export function testInstantEpoch(): void {
+export function testInstantEpoch(): none {
     Assert.equal(Instant.EPOCH.toEpochSeconds(), 0L)
     Assert.equal(Instant.EPOCH.toEpochMillis(), 0L)
     Assert.equal(Instant.EPOCH.toEpochNanos(), 0L)
 }
 
-export function testInstantPlusMinus(): void {
+export function testInstantPlusMinus(): none {
     let base = Instant.ofEpochSeconds(1000L)
     let later = base.plus(Duration.ofSeconds(500L))
     Assert.equal(later.toEpochSeconds(), 1500L)
@@ -218,14 +218,14 @@ export function testInstantPlusMinus(): void {
     Assert.equal(earlier.toEpochSeconds(), 800L)
 }
 
-export function testInstantDuration(): void {
+export function testInstantDuration(): none {
     let a = Instant.ofEpochSeconds(100L)
     let b = Instant.ofEpochSeconds(300L)
     Assert.equal(a.durationUntil(b).toSeconds(), 200.0)
     Assert.equal(b.durationSince(a).toSeconds(), 200.0)
 }
 
-export function testInstantComparison(): void {
+export function testInstantComparison(): none {
     let a = Instant.ofEpochMillis(1000L)
     let b = Instant.ofEpochMillis(2000L)
     Assert.isTrue(a.isBefore(b))
@@ -234,52 +234,52 @@ export function testInstantComparison(): void {
     Assert.isTrue(a.equals(Instant.ofEpochMillis(1000L)))
 }
 
-export function testInstantParse(): void {
+export function testInstantParse(): none {
     let result = Instant.parse("1970-01-01T00:00:00Z")
     Assert.isTrue(isSuccess(result))
     let instant = try! result
     Assert.equal(instant.toEpochSeconds(), 0L)
 }
 
-export function testInstantHttpDateFormatting(): void {
+export function testInstantHttpDateFormatting(): none {
     Assert.equal(Instant.EPOCH.toHttpDate(), "Thu, 01 Jan 1970 00:00:00 GMT")
     Assert.equal(Instant.ofEpochSeconds(784111777L).toHttpDate(), "Sun, 06 Nov 1994 08:49:37 GMT")
 }
 
-export function testInstantHttpDateParsing(): void {
+export function testInstantHttpDateParsing(): none {
     instant := try! Instant.parseHttpDate("Sun, 06 Nov 1994 08:49:37 GMT")
 
     Assert.equal(instant.toEpochSeconds(), 784111777L)
 }
 
-export function testInstantHttpDateParsingRejectsInvalidValues(): void {
+export function testInstantHttpDateParsingRejectsInvalidValues(): none {
     Assert.isTrue(isFailure(Instant.parseHttpDate("Sun, 06 Foo 1994 08:49:37 GMT")))
     Assert.isTrue(isFailure(Instant.parseHttpDate("Sun, 06 Nov 1994 08:49:60 GMT")))
     Assert.isTrue(isFailure(Instant.parseHttpDate("1994-11-06T08:49:37Z")))
 }
 
-export function testInstantNow(): void {
+export function testInstantNow(): none {
     let before = Instant.ofEpochSeconds(0L)
     let now = Instant.now()
     Assert.isTrue(now.isAfter(before))
 }
 
-// ─── Date ────────────────────────────────────────────────────────────────────
+// âââ Date ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-export function testDateOf(): void {
+export function testDateOf(): none {
     let d = try! Date.create(2024, 6, 1)
     Assert.equal(d.year, 2024)
     Assert.equal(d.month, 6)
     Assert.equal(d.day, 1)
 }
 
-export function testDateInvalid(): void {
+export function testDateInvalid(): none {
     Assert.isTrue(isFailure(Date.create(2024, 13, 1)))   // month out of range
     Assert.isTrue(isFailure(Date.create(2024, 2, 30)))   // day out of range for Feb
     Assert.isTrue(isFailure(Date.create(2024, 0, 1)))    // month zero
 }
 
-export function testDateLeapYear(): void {
+export function testDateLeapYear(): none {
     let leap = try! Date.create(2024, 1, 1)
     Assert.isTrue(leap.isLeapYear())
     let nonLeap = try! Date.create(2023, 1, 1)
@@ -290,14 +290,14 @@ export function testDateLeapYear(): void {
     Assert.isFalse((try! Date.create(1900, 1, 1)).isLeapYear())
 }
 
-export function testDatePlusDays(): void {
+export function testDatePlusDays(): none {
     let d = try! Date.create(2024, 1, 30)
     let next = d.plusDays(3)
     Assert.equal(next.month, 2)
     Assert.equal(next.day, 2)
 }
 
-export function testDatePlusMonths(): void {
+export function testDatePlusMonths(): none {
     let d = try! Date.create(2024, 1, 31)
     // Jan 31 + 1 month = Feb 29 (2024 is a leap year, clamps to last valid day)
     let next = d.plusMonths(1)
@@ -305,14 +305,14 @@ export function testDatePlusMonths(): void {
     Assert.equal(next.day, 29)
 }
 
-export function testDateDaysUntil(): void {
+export function testDateDaysUntil(): none {
     let a = try! Date.create(2024, 1, 1)
     let b = try! Date.create(2024, 1, 11)
     Assert.equal(a.daysUntil(b), 10)
     Assert.equal(b.daysUntil(a), -10)
 }
 
-export function testDateComparison(): void {
+export function testDateComparison(): none {
     let earlier = try! Date.create(2023, 12, 31)
     let later = try! Date.create(2024, 1, 1)
     Assert.isTrue(earlier.isBefore(later))
@@ -320,20 +320,20 @@ export function testDateComparison(): void {
     Assert.isTrue(earlier.equals(try! Date.create(2023, 12, 31)))
 }
 
-export function testDateDayOfWeek(): void {
+export function testDateDayOfWeek(): none {
     // 2024-01-01 is a Monday
     let d = try! Date.create(2024, 1, 1)
     Assert.equal(d.dayOfWeek(), DayOfWeek.Monday)
 }
 
-export function testDateISOString(): void {
+export function testDateISOString(): none {
     let d = try! Date.create(2024, 6, 1)
     Assert.equal(d.toISOString(), "2024-06-01")
     let padded = try! Date.create(9, 1, 5)
     Assert.equal(padded.toISOString(), "0009-01-05")
 }
 
-export function testDateParse(): void {
+export function testDateParse(): none {
     let d = try! Date.parse("2024-06-01")
     Assert.equal(d.year, 2024)
     Assert.equal(d.month, 6)
@@ -341,9 +341,9 @@ export function testDateParse(): void {
     Assert.isTrue(isFailure(Date.parse("not-a-date")))
 }
 
-// ─── Time ────────────────────────────────────────────────────────────────────
+// âââ Time ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-export function testTimeOf(): void {
+export function testTimeOf(): none {
     let t = try! Time.create(12, 30, 45, 0)
     Assert.equal(t.hour, 12)
     Assert.equal(t.minute, 30)
@@ -351,43 +351,43 @@ export function testTimeOf(): void {
     Assert.equal(t.nanosecond, 0)
 }
 
-export function testTimeInvalid(): void {
+export function testTimeInvalid(): none {
     Assert.isTrue(isFailure(Time.create(24, 0)))    // hour out of range
     Assert.isTrue(isFailure(Time.create(0, 60)))    // minute out of range
     Assert.isTrue(isFailure(Time.create(0, 0, 60))) // second out of range
 }
 
-export function testTimePlusHours(): void {
+export function testTimePlusHours(): none {
     let t = try! Time.create(23, 0)
     // wraps around midnight
     let next = t.plusHours(2)
     Assert.equal(next.hour, 1)
 }
 
-export function testTimeISOString(): void {
+export function testTimeISOString(): none {
     Assert.equal(Time.MIDNIGHT.toISOString(), "00:00:00")
     Assert.equal(Time.NOON.toISOString(), "12:00:00")
     let withNanos = try! Time.create(9, 5, 3, 500000000)
     Assert.equal(withNanos.toISOString(), "09:05:03.5")
 }
 
-export function testTimeParse(): void {
+export function testTimeParse(): none {
     let t = try! Time.parse("14:30:00")
     Assert.equal(t.hour, 14)
     Assert.equal(t.minute, 30)
     Assert.equal(t.second, 0)
 }
 
-// ─── DateTime ────────────────────────────────────────────────────────────────
+// âââ DateTime ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-export function testDateTimeOf(): void {
+export function testDateTimeOf(): none {
     let dt = try! DateTime.fromParts(2024, 6, 1, 12, 30)
     Assert.equal(dt.date.year, 2024)
     Assert.equal(dt.time.hour, 12)
     Assert.equal(dt.time.minute, 30)
 }
 
-export function testDateTimePlusDays(): void {
+export function testDateTimePlusDays(): none {
     let dt = try! DateTime.fromParts(2024, 1, 31, 23, 0)
     let next = dt.plusDays(1)
     Assert.equal(next.date.month, 2)
@@ -395,7 +395,7 @@ export function testDateTimePlusDays(): void {
     Assert.equal(next.time.hour, 23)
 }
 
-export function testDateTimePlusHours(): void {
+export function testDateTimePlusHours(): none {
     // Crossing a day boundary
     let dt = try! DateTime.fromParts(2024, 6, 1, 23, 0)
     let next = dt.plusHours(2)
@@ -403,43 +403,43 @@ export function testDateTimePlusHours(): void {
     Assert.equal(next.time.hour, 1)
 }
 
-export function testDateTimeRoundTripUTC(): void {
+export function testDateTimeRoundTripUTC(): none {
     let dt = try! DateTime.fromParts(2024, 6, 1, 12, 0)
     let instant = dt.toInstantUTC()
     let back = instant.toDateTime()
     Assert.isTrue(back.equals(dt))
 }
 
-export function testDateTimeISOString(): void {
+export function testDateTimeISOString(): none {
     let dt = try! DateTime.fromParts(2024, 6, 1, 9, 5, 3)
     Assert.equal(dt.toISOString(), "2024-06-01T09:05:03")
 }
 
-export function testDateTimeParse(): void {
+export function testDateTimeParse(): none {
     let dt = try! DateTime.parse("2024-06-01T12:30:00")
     Assert.equal(dt.date.year, 2024)
     Assert.equal(dt.time.hour, 12)
 }
 
-// ─── TimeZone & ZonedDateTime ─────────────────────────────────────────────────
+// âââ TimeZone & ZonedDateTime âââââââââââââââââââââââââââââââââââââââââââââââââ
 
-export function testTimeZoneUTC(): void {
+export function testTimeZoneUTC(): none {
     let utc = TimeZone.UTC
     Assert.equal(utc.id, "UTC")
     let offset = utc.offsetSecondsAt(Instant.EPOCH)
     Assert.equal(offset, 0)
 }
 
-export function testTimeZoneLookupInvalid(): void {
+export function testTimeZoneLookupInvalid(): none {
     Assert.isTrue(isFailure(TimeZone.lookup("Not/AZone")))
 }
 
-export function testZonedDateTimeNowUTC(): void {
+export function testZonedDateTimeNowUTC(): none {
     let zdt = ZonedDateTime.nowUTC()
     Assert.equal(zdt.zone.id, "UTC")
 }
 
-export function testZonedDateTimeConvertZones(): void {
+export function testZonedDateTimeConvertZones(): none {
     let utcZone = TimeZone.UTC
     let sydneyZone = try! TimeZone.lookup("Australia/Sydney")
 
@@ -453,21 +453,21 @@ export function testZonedDateTimeConvertZones(): void {
     Assert.isTrue(utcZdt.toInstant().equals(sydneyZdt.toInstant()))
 }
 
-export function testZonedDateTimeISOString(): void {
+export function testZonedDateTimeISOString(): none {
     let utcZone = TimeZone.UTC
     let dt = try! DateTime.fromParts(2024, 6, 1, 12, 0)
     let zdt = ZonedDateTime { dateTime: dt, zone: utcZone }
     Assert.equal(zdt.toISOString(), "2024-06-01T12:00:00Z")
 }
 
-// ─── DayOfWeek & Month enums ─────────────────────────────────────────────────
+// âââ DayOfWeek & Month enums âââââââââââââââââââââââââââââââââââââââââââââââââ
 
-export function testDayOfWeekValues(): void {
+export function testDayOfWeekValues(): none {
     Assert.equal(DayOfWeek.Monday.value, 1)
     Assert.equal(DayOfWeek.Sunday.value, 7)
 }
 
-export function testMonthValues(): void {
+export function testMonthValues(): none {
     Assert.equal(Month.January.value, 1)
     Assert.equal(Month.December.value, 12)
 }
