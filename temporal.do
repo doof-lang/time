@@ -1,3 +1,5 @@
+import { parseInt } from "std/parse"
+
 import { Duration } from "./duration"
 
 export class Instant "A point in UTC time with nanosecond precision." {
@@ -69,22 +71,22 @@ export class Instant "A point in UTC time with nanosecond precision." {
             return Failure { error: "HTTP date must use IMF-fixdate format" }
         }
 
-        day := try? int.parse(s.substring(5, 7)) else {
+        day := try? parseInt(s.substring(5, 7)) else {
             return Failure { error: "HTTP date day is invalid" }
         }
         month := httpMonthNumber(s.substring(8, 11)) else {
             return Failure { error: "HTTP date month is invalid" }
         }
-        year := try? int.parse(s.substring(12, 16)) else {
+        year := try? parseInt(s.substring(12, 16)) else {
             return Failure { error: "HTTP date year is invalid" }
         }
-        hour := try? int.parse(s.substring(17, 19)) else {
+        hour := try? parseInt(s.substring(17, 19)) else {
             return Failure { error: "HTTP date hour is invalid" }
         }
-        minute := try? int.parse(s.substring(20, 22)) else {
+        minute := try? parseInt(s.substring(20, 22)) else {
             return Failure { error: "HTTP date minute is invalid" }
         }
-        second := try? int.parse(s.substring(23, 25)) else {
+        second := try? parseInt(s.substring(23, 25)) else {
             return Failure { error: "HTTP date second is invalid" }
         }
         try date := Date.create(year, month, day)
