@@ -22,10 +22,10 @@ export class TimerSummary {
 }
 
 class TimerBucket {
-    count: int = 0
-    totalNanos: long = 0L
-    minNanos: long = 0L
-    maxNanos: long = 0L
+    let count: int = 0
+    let totalNanos: long = 0L
+    let minNanos: long = 0L
+    let maxNanos: long = 0L
     durations: long[] = []
 
     record(duration: Duration): none {
@@ -123,7 +123,7 @@ export class Stopwatch {
         }
 
         return TimerSummary {
-            entries: entries.buildReadonly(),
+            entries: entries.drainToReadonly(),
         }
     }
 
@@ -154,8 +154,8 @@ export class StopwatchSpan {
     stopwatch: Stopwatch
     readonly name: string
     readonly startedAt: Instant
-    private finished: bool = false
-    private finishedDuration: Duration | none = none
+    private let finished: bool = false
+    private let finishedDuration: Duration | none = none
 
     finish(): Duration {
         if finished {
