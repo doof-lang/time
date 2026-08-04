@@ -10,11 +10,30 @@
 #include <string>
 #include <sys/stat.h>
 #include <thread>
+#if defined(_WIN32)
+#define NOMINMAX
+#include <windows.h>
+#else
 #include <unistd.h>
+#endif
 
 namespace doof_time {
 
 namespace detail {
+
+#if defined(_WIN32)
+inline int set_environment(const char* name, const char* value) { return ::_putenv_s(name, value); }
+inline int unset_environment(const char* name) { return ::_putenv_s(name, ""); }
+inline void refresh_timezone() { ::_tzset(); }
+inline std::tm* local_time(const std::time_t* value, std::tm* output) {
+    return ::localtime_s(output, value) == 0 ? output : nullptr;
+}
+#else
+inline int set_environment(const char* name, const char* value) { return ::setenv(name, value, 1); }
+inline int unset_environment(const char* name) { return ::unsetenv(name); }
+inline void refresh_timezone() { ::tzset(); }
+inline std::tm* local_time(const std::time_t* value, std::tm* output) { return ::localtime_r(value, output); }
+#endif
 
 using InstantPtr = std::shared_ptr<Instant>;
 using DatePtr = std::shared_ptr<Date>;
@@ -81,7 +100,11 @@ bool zone_file_exists(const std::string& id) {
     if (id == "UTC" || id == "Etc/UTC") {
         return true;
     }
+#if defined(_WIN32)
+    return false;
+#else
     return file_exists("/usr/share/zoneinfo/" + id) || file_exists("/var/db/timezone/zoneinfo/" + id);
+#endif
 }
 
 std::string trim_fractional_nanos(int32_t nanos) {
@@ -218,17 +241,17 @@ public:
             old_ = existing;
         }
 
-        ::setenv("TZ", id.c_str(), 1);
-        ::tzset();
+        set_environment("TZ", id.c_str());
+        refresh_timezone();
     }
 
     ~ScopedTimeZone() {
         if (hadOld_) {
-            ::setenv("TZ", old_.c_str(), 1);
+            set_environment("TZ", old_.c_str());
         } else {
-            ::unsetenv("TZ");
+            unset_environment("TZ");
         }
-        ::tzset();
+        refresh_timezone();
     }
 
 private:
@@ -249,6 +272,7 @@ auto with_timezone(const std::string& id, Func&& func) -> decltype(func()) {
 }
 
 std::string current_timezone_id() {
+#if !defined(_WIN32)
     char buffer[PATH_MAX];
     const ssize_t count = ::readlink("/etc/localtime", buffer, sizeof(buffer) - 1);
     if (count > 0) {
@@ -262,6 +286,7 @@ std::string current_timezone_id() {
             }
         }
     }
+#endif
 
     const char* env = std::getenv("TZ");
     if (env != nullptr) {
@@ -495,7 +520,7 @@ std::shared_ptr<DateTime> instant_to_datetime_in_zone(int64_t epoch_nanos, std::
     return detail::with_timezone(zone->id, [&]() {
         std::time_t raw = static_cast<std::time_t>(epoch_seconds);
         std::tm local_tm {};
-        if (::localtime_r(&raw, &local_tm) == nullptr) {
+        if (detail::local_time(&raw, &local_tm) == nullptr) {
             doof::panic("Failed to convert instant to local datetime");
         }
 
@@ -654,11 +679,15 @@ int32_t zone_offset_at(const std::string& id, int64_t epoch_seconds) {
     return detail::with_timezone(id, [&]() {
         std::time_t raw = static_cast<std::time_t>(epoch_seconds);
         std::tm local_tm {};
-        if (::localtime_r(&raw, &local_tm) == nullptr) {
+        if (detail::local_time(&raw, &local_tm) == nullptr) {
             doof::panic("Failed to resolve timezone offset");
         }
 
+#if defined(_WIN32)
+        const std::time_t local_as_utc = ::_mkgmtime64(&local_tm);
+#else
         const std::time_t local_as_utc = ::timegm(&local_tm);
+#endif
         return static_cast<int32_t>(local_as_utc - raw);
     });
 }
@@ -671,7 +700,7 @@ bool zone_dst_at(const std::string& id, int64_t epoch_seconds) {
     return detail::with_timezone(id, [&]() {
         std::time_t raw = static_cast<std::time_t>(epoch_seconds);
         std::tm local_tm {};
-        if (::localtime_r(&raw, &local_tm) == nullptr) {
+        if (detail::local_time(&raw, &local_tm) == nullptr) {
             doof::panic("Failed to resolve DST state");
         }
         return local_tm.tm_isdst > 0;
