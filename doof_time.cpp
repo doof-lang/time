@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <fstream>
 #include <limits.h>
 #include <mutex>
 #include <string>
@@ -104,6 +105,11 @@ bool zone_file_exists(const std::string& id) {
 #if defined(_WIN32)
     return false;
 #else
+    const char* timezoneDirectory = std::getenv("TZDIR");
+    if (timezoneDirectory != nullptr && timezoneDirectory[0] != '\0' &&
+        file_exists(std::string(timezoneDirectory) + "/" + id)) {
+        return true;
+    }
     return file_exists("/usr/share/zoneinfo/" + id) || file_exists("/var/db/timezone/zoneinfo/" + id);
 #endif
 }
@@ -273,6 +279,17 @@ auto with_timezone(const std::string& id, Func&& func) -> decltype(func()) {
 }
 
 std::string current_timezone_id() {
+    const char* env = std::getenv("TZ");
+    if (env != nullptr) {
+        std::string id(env);
+        if (!id.empty() && id.front() == ':') {
+            id.erase(id.begin());
+        }
+        if (is_valid_zone_id(id) && zone_file_exists(id)) {
+            return id;
+        }
+    }
+
 #if !defined(_WIN32)
     char buffer[PATH_MAX];
     const ssize_t count = ::readlink("/etc/localtime", buffer, sizeof(buffer) - 1);
@@ -289,16 +306,24 @@ std::string current_timezone_id() {
     }
 #endif
 
-    const char* env = std::getenv("TZ");
-    if (env != nullptr) {
-        std::string id(env);
-        if (!id.empty() && id.front() == ':') {
-            id.erase(id.begin());
-        }
-        if (is_valid_zone_id(id) && zone_file_exists(id)) {
-            return id;
+#if defined(__linux__)
+    std::ifstream timezoneFile("/etc/timezone");
+    if (timezoneFile) {
+        std::string id;
+        if (std::getline(timezoneFile, id)) {
+            const std::size_t first = id.find_first_not_of(" \t\r\n");
+            const std::size_t last = id.find_last_not_of(" \t\r\n");
+            if (first != std::string::npos) {
+                id = id.substr(first, last - first + 1);
+            } else {
+                id.clear();
+            }
+            if (is_valid_zone_id(id) && zone_file_exists(id)) {
+                return id;
+            }
         }
     }
+#endif
 
     return "UTC";
 }

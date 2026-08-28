@@ -4,6 +4,9 @@
 values, IANA timezone conversion, current-thread sleeping, and named stopwatch
 measurements.
 
+Linux timezone lookup honors `TZDIR`. Local-zone discovery checks `TZ`, the
+`/etc/localtime` zoneinfo symlink, and `/etc/timezone`, then falls back to UTC.
+
 ## Choosing A Type
 
 - `Duration` represents signed elapsed time with nanosecond precision.

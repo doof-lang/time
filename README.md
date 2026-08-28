@@ -2,6 +2,9 @@
 
 Date, time, duration, and timezone handling for Doof. The package provides UTC instants, timezone-free calendar and clock types, and IANA timezone conversion through the platform time database.
 
+On Linux, timezone lookup honors `TZDIR`, and local-zone discovery checks `TZ`,
+`/etc/localtime`, and `/etc/timezone` before falling back to UTC.
+
 ## Documentation
 
 - [Guide and API reference](docs/API.md) explains durations, instants, calendar types, time zones, formatting/parsing, sleeping, and stopwatch metrics.
