@@ -502,17 +502,57 @@ int64_t system_nanos_epoch() {
     return std::chrono::duration_cast<std::chrono::nanoseconds>(now).count();
 }
 
+int64_t monotonic_nanos() {
+    const auto now = std::chrono::steady_clock::now().time_since_epoch();
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(now).count();
+}
+
 doof::Result<std::shared_ptr<Instant>, std::string> parse_instant(const std::string& text) {
-    if (text.empty() || text.back() != 'Z') {
-        return doof::Failure<std::string>{"Instant must end with 'Z'"};
+    if (text.empty()) {
+        return doof::Failure<std::string>{"Instant must include a UTC designator or numeric offset"};
     }
 
-    const auto parsed = detail::parse_datetime_parts(text.substr(0, text.size() - 1));
+    std::string datetime_text;
+    int32_t offset_seconds = 0;
+
+    if (text.back() == 'Z') {
+        datetime_text = text.substr(0, text.size() - 1);
+    } else {
+        if (text.size() < 6) {
+            return doof::Failure<std::string>{"Instant must include a UTC designator or numeric offset"};
+        }
+
+        const std::size_t offset_start = text.size() - 6;
+        const char sign = text[offset_start];
+        if ((sign != '+' && sign != '-') || text[offset_start + 3] != ':') {
+            return doof::Failure<std::string>{"Invalid RFC 3339 offset"};
+        }
+
+        int32_t offset_hour = 0;
+        int32_t offset_minute = 0;
+        if (!detail::parse_fixed_digits(text, offset_start + 1, 2, offset_hour) ||
+            !detail::parse_fixed_digits(text, offset_start + 4, 2, offset_minute) ||
+            offset_hour > 23 || offset_minute > 59) {
+            return doof::Failure<std::string>{"Invalid RFC 3339 offset"};
+        }
+
+        offset_seconds = (offset_hour * 60 + offset_minute) * 60;
+        if (sign == '-') {
+            offset_seconds = -offset_seconds;
+        }
+        datetime_text = text.substr(0, offset_start);
+    }
+
+    const auto parsed = detail::parse_datetime_parts(datetime_text);
     if (doof::is_failure(parsed)) {
         return doof::Failure<std::string>{doof::failure_error(parsed)};
     }
 
-    return doof::Success<std::shared_ptr<Instant>>{detail::make_instant(detail::combine_datetime_utc(doof::success_value(parsed)->date, doof::success_value(parsed)->time))};
+    const int64_t local_nanos = detail::combine_datetime_utc(
+        doof::success_value(parsed)->date,
+        doof::success_value(parsed)->time);
+    const int64_t offset_nanos = static_cast<int64_t>(offset_seconds) * detail::kNanosPerSecond;
+    return doof::Success<std::shared_ptr<Instant>>{detail::make_instant(local_nanos - offset_nanos)};
 }
 
 std::string format_instant(int64_t epoch_nanos) {

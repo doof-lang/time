@@ -1,5 +1,5 @@
 import { Duration } from "./duration"
-import { Instant } from "./temporal"
+import { MonotonicInstant } from "./monotonic"
 
 export class TimerError {
     readonly kind: string
@@ -73,7 +73,7 @@ export class Stopwatch {
         return StopwatchSpan {
             stopwatch: this,
             name,
-            startedAt: Instant.now(),
+            startedAt: MonotonicInstant.now(),
         }
     }
 
@@ -153,7 +153,7 @@ export class Stopwatch {
 export class StopwatchSpan {
     stopwatch: Stopwatch
     readonly name: string
-    readonly startedAt: Instant
+    readonly startedAt: MonotonicInstant
     private let finished: bool = false
     private let finishedDuration: Duration | none = none
 
@@ -162,7 +162,7 @@ export class StopwatchSpan {
             return finishedDuration!
         }
 
-        let elapsed = startedAt.durationUntil(Instant.now())
+        let elapsed = startedAt.durationUntil(MonotonicInstant.now())
         stopwatch.record(name, elapsed)
         finished = true
         finishedDuration = elapsed

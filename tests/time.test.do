@@ -2,7 +2,7 @@
 
 import { Assert } from "std/assert"
 import {
-    Duration, Thread, Instant, Date, Time, DateTime, TimeZone, ZonedDateTime,
+    Duration, Thread, Instant, MonotonicInstant, Date, Time, DateTime, TimeZone, ZonedDateTime,
     DayOfWeek, Month, Stopwatch, TimerError
 } from "../index"
 
@@ -112,10 +112,34 @@ export function testThreadSleepZeroAndNegativeDurationsReturn(): none {
 }
 
 export function testThreadSleepDelaysCurrentThread(): none {
-    let startedAt = Instant.now()
+    let startedAt = MonotonicInstant.now()
     Thread.sleep(Duration.ofMillis(5L))
-    let elapsed = startedAt.durationUntil(Instant.now())
+    let elapsed = startedAt.durationUntil(MonotonicInstant.now())
     Assert.isTrue(elapsed.toMillis() >= 1L)
+}
+
+export function testMonotonicInstantMeasuresElapsedTime(): none {
+    let startedAt = MonotonicInstant.now()
+    Thread.sleep(Duration.ofMillis(2L))
+    let finishedAt = MonotonicInstant.now()
+
+    Assert.isTrue(finishedAt.isAfter(startedAt))
+    Assert.isTrue(startedAt.isBefore(finishedAt))
+    Assert.isTrue(startedAt.durationUntil(finishedAt).toMillis() >= 1L)
+    Assert.equal(finishedAt.durationSince(startedAt).toNanos(), startedAt.durationUntil(finishedAt).toNanos())
+}
+
+export function testMonotonicInstantArithmeticAndComparison(): none {
+    let base = MonotonicInstant.now()
+    let later = base.plus(Duration.ofSeconds(2L))
+    let earlier = base.minus(Duration.ofSeconds(1L))
+
+    Assert.equal(base.durationUntil(later).toSeconds(), 2.0)
+    Assert.equal(base.durationSince(earlier).toSeconds(), 1.0)
+    Assert.equal(base.compareTo(base), 0)
+    Assert.isTrue(base.equals(base))
+    Assert.isTrue(later.isAfter(base))
+    Assert.isTrue(earlier.isBefore(base))
 }
 
 // âââ Stopwatch âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
@@ -239,6 +263,34 @@ export function testInstantParse(): none {
     Assert.isTrue(isSuccess(result))
     let instant = try! result
     Assert.equal(instant.toEpochSeconds(), 0L)
+}
+
+export function testInstantParsePositiveOffset(): none {
+    let instant = try! Instant.parse("2024-06-01T12:30:45+10:00")
+    Assert.equal(instant.toISOString(), "2024-06-01T02:30:45Z")
+}
+
+export function testInstantParseNegativeOffsetAcrossDateBoundary(): none {
+    let instant = try! Instant.parse("2024-06-01T23:45:00-05:30")
+    Assert.equal(instant.toISOString(), "2024-06-02T05:15:00Z")
+}
+
+export function testInstantParseOffsetPreservesNanoseconds(): none {
+    let instant = try! Instant.parse("1970-01-01T01:00:00.123456789+01:00")
+    Assert.equal(instant.toEpochNanos(), 123456789L)
+}
+
+export function testInstantParseZeroOffsets(): none {
+    Assert.isTrue((try! Instant.parse("1970-01-01T00:00:00+00:00")).equals(Instant.EPOCH))
+    Assert.isTrue((try! Instant.parse("1970-01-01T00:00:00-00:00")).equals(Instant.EPOCH))
+}
+
+export function testInstantParseRejectsInvalidOffsets(): none {
+    Assert.isTrue(isFailure(Instant.parse("2024-06-01T12:00:00")))
+    Assert.isTrue(isFailure(Instant.parse("2024-06-01T12:00:00+1000")))
+    Assert.isTrue(isFailure(Instant.parse("2024-06-01T12:00:00+24:00")))
+    Assert.isTrue(isFailure(Instant.parse("2024-06-01T12:00:00-10:60")))
+    Assert.isTrue(isFailure(Instant.parse("2024-06-01T12:00:00+ab:cd")))
 }
 
 export function testInstantHttpDateFormatting(): none {

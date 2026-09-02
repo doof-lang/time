@@ -1,5 +1,5 @@
 import { Assert } from "std/assert"
-import { Date, DateTime, Duration, Instant, Stopwatch, Thread, Time, TimeZone, Month, DayOfWeek } from "../index"
+import { Date, DateTime, Duration, Instant, MonotonicInstant, Stopwatch, Thread, Time, TimeZone, Month, DayOfWeek } from "../index"
 
 export function testReadmeMeasureElapsedTimeAndDeadlines(): none {
     let startedAt = Instant.ofEpochSeconds(1_000L)
@@ -13,6 +13,14 @@ export function testReadmeMeasureElapsedTimeAndDeadlines(): none {
     Assert.equal(timeout.toISOString(), "PT30S")
     Assert.equal(pollInterval.toMillis(), 250L)
     Assert.equal(maxPolls, 120L)
+}
+
+export function testReadmeMeasureElapsedTimeSafely(): none {
+    let startedAt = MonotonicInstant.now()
+    Thread.sleep(Duration.ofMillis(1L))
+    let elapsed = startedAt.durationUntil(MonotonicInstant.now())
+
+    Assert.isTrue(elapsed.toNanos() > 0L)
 }
 
 export function testReadmeBuildCalendarValuesAndMoveThemAroundSafely(): none {
@@ -47,7 +55,7 @@ export function testReadmeConvertTheSameMeetingBetweenTimeZones(): none {
 
 export function testReadmeParseInputAndInspectTimezoneRules(): none {
     let launchDate = try! Date.parse("2026-04-21")
-    let publishedAt = try! Instant.parse("2026-04-21T14:00:00Z")
+    let publishedAt = try! Instant.parse("2026-04-22T00:00:00+10:00")
     let reviewSlot = try! DateTime.parse("2026-04-21T16:30:00")
     let timeout = try! Duration.parse("PT30S")
 

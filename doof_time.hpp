@@ -30,6 +30,7 @@ using DayOfWeek = ::std_::time::temporal::DayOfWeek;
 
 namespace doof_time {
 int64_t system_nanos_epoch();
+int64_t monotonic_nanos();
 doof::Result<std::shared_ptr<Instant>, std::string> parse_instant(const std::string& text);
 std::string format_instant(int64_t epoch_nanos);
 std::shared_ptr<DateTime> instant_to_datetime(int64_t epoch_nanos);

@@ -18,7 +18,8 @@ export class Instant "A point in UTC time with nanosecond precision." {
     static ofEpochMillis(ms: long): Instant => Instant { epochNanos: ms * 1000000L }
     static ofEpochSeconds(s: long): Instant => Instant { epochNanos: s * 1000000000L }
 
-    // Parses an RFC 3339 / ISO 8601 UTC string, e.g. "2024-06-01T12:00:00Z"
+    // Parses an RFC 3339 timestamp with "Z" or a numeric offset, e.g.
+    // "2024-06-01T12:00:00Z" or "2024-06-01T22:00:00+10:00".
     static parse(s: string): Result<Instant, string> {
         return _parseInstant(s)
     }

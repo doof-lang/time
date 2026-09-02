@@ -11,6 +11,8 @@ Linux timezone lookup honors `TZDIR`. Local-zone discovery checks `TZ`, the
 
 - `Duration` represents signed elapsed time with nanosecond precision.
 - `Instant` represents a UTC point in time.
+- `MonotonicInstant` represents a process-local time point suitable for elapsed
+  measurements and deadlines.
 - `Date`, `Time`, and `DateTime` represent wall-clock calendar values without a
   timezone.
 - `TimeZone` represents an IANA timezone.
@@ -19,8 +21,10 @@ Linux timezone lookup honors `TZDIR`. Local-zone discovery checks `TZ`, the
 
 ## Arithmetic And Conversion
 
-Use `Duration` for timeouts and elapsed work. Use `Instant` for deadlines and
-ordering events. Convert `DateTime` to an instant only after deciding which
+Use `Duration` for timeouts and elapsed work. Use `MonotonicInstant` for
+in-process deadlines and measurements that must not be affected by wall-clock
+adjustments. Use `Instant` for timestamps and ordering externally observed
+events. Convert `DateTime` to an instant only after deciding which
 timezone should interpret the wall-clock value.
 
 `withZoneSameInstant` preserves the underlying moment and changes presentation.
@@ -33,23 +37,26 @@ within a 24-hour day.
 ## Parsing And Formatting
 
 Parsing returns `Result<T, string>`. Types support ISO-style parse/format helpers
-where appropriate. `Instant` also supports HTTP date parsing/formatting for
-headers and cache validators.
+where appropriate. `Instant.parse` accepts RFC 3339 timestamps with `Z` or a
+numeric `+HH:MM`/`-HH:MM` offset and normalizes them to UTC. `Instant` also
+supports HTTP date parsing/formatting for headers and cache validators.
 
 ## Sleeping And Measuring
 
 `Thread.sleep(duration)` blocks the current OS thread. Zero or negative
 durations return immediately.
 
-`Stopwatch.measure(name)` returns a span that records on `finish()` or at the
-end of a `with` block. Aggregates such as `total`, `mean`, `min`, `max`, and
-`p95` return `Result<Duration, TimerError>` when the label has no samples.
+`Stopwatch.measure(name)` uses the monotonic clock and returns a span that
+records on `finish()` or at the end of a `with` block. Aggregates such as
+`total`, `mean`, `min`, `max`, and `p95` return
+`Result<Duration, TimerError>` when the label has no samples.
 
 ## API Map
 
 Elapsed and UTC:
 
 - `Duration`
+- `MonotonicInstant`
 - `Instant`
 - `Thread`
 

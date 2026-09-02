@@ -1,6 +1,6 @@
 # std/time
 
-Date, time, duration, and timezone handling for Doof. The package provides UTC instants, timezone-free calendar and clock types, and IANA timezone conversion through the platform time database.
+Date, time, duration, and timezone handling for Doof. The package provides UTC instants, monotonic process-local time points, timezone-free calendar and clock types, and IANA timezone conversion through the platform time database.
 
 On Linux, timezone lookup honors `TZDIR`, and local-zone discovery checks `TZ`,
 `/etc/localtime`, and `/etc/timezone` before falling back to UTC.
@@ -41,6 +41,20 @@ Thread.sleep(Duration.ofMillis(50L))
 ```
 
 `Thread.sleep(...)` blocks the current operating-system thread for the requested duration. Zero or negative durations return immediately.
+
+### Measure elapsed time safely
+
+```doof
+import { Duration, MonotonicInstant, Thread } from "std/time"
+
+startedAt := MonotonicInstant.now()
+Thread.sleep(Duration.ofMillis(10L))
+elapsed := startedAt.durationUntil(MonotonicInstant.now())
+
+println("elapsed: ${elapsed.toMillis()} ms")
+```
+
+`MonotonicInstant` is unaffected by wall-clock adjustments, making it suitable for elapsed measurements and in-process deadlines. Its values are intentionally process-local and cannot be formatted or converted to epoch timestamps.
 
 ### Collect named timings
 
@@ -112,7 +126,7 @@ Use `withZoneSameInstant(...)` when the underlying moment must stay the same and
 import { Date, DateTime, Duration, Instant, TimeZone } from "std/time"
 
 launchDate := try! Date.parse("2026-04-21")
-publishedAt := try! Instant.parse("2026-04-21T14:00:00Z")
+publishedAt := try! Instant.parse("2026-04-22T00:00:00+10:00")
 servedAt := try! Instant.parseHttpDate("Tue, 21 Apr 2026 14:00:00 GMT")
 reviewSlot := try! DateTime.parse("2026-04-21T16:30:00")
 timeout := try! Duration.parse("PT30S")
@@ -128,7 +142,7 @@ println("UTC offset: ${offsetSeconds} seconds")
 println("DST active: ${sydney.isDSTAt(publishedAt)}")
 ```
 
-Parsing returns `Result<T, string>`, so you can propagate failures with `try!` or handle them explicitly with `case`.
+Parsing returns `Result<T, string>`, so you can propagate failures with `try!` or handle them explicitly with `case`. `Instant.parse(...)` accepts RFC 3339 timestamps using either `Z` or numeric offsets such as `+10:00` and normalizes them to UTC.
 
 ## Type Guide
 
@@ -140,13 +154,17 @@ Signed elapsed time with nanosecond precision. Use unit constructors like `ofSec
 
 UTC timestamp stored as nanoseconds since the Unix epoch. Supports clock reads with `now()`, parsing from RFC 3339 strings and HTTP IMF-fixdate strings, arithmetic with `Duration`, and conversion to `DateTime` or `ZonedDateTime`.
 
+### `MonotonicInstant`
+
+Opaque process-local time point backed by a monotonic clock. Supports elapsed-time calculations, deadline arithmetic, and comparison without being affected by wall-clock changes.
+
 ### `Thread`
 
 Current-thread utilities. Use `sleep(...)` with a `Duration` to block the current operating-system thread.
 
 ### `Stopwatch`
 
-Named timing collector for lightweight instrumentation. Use `measure(...)` to create spans, `count(...)` for the number of recorded spans, aggregate methods such as `total(...)`, `mean(...)`, `min(...)`, `max(...)`, and `p95(...)` for durations, and `summary()` for per-label stats.
+Named timing collector for lightweight instrumentation. It uses the monotonic clock so measurements are unaffected by wall-clock adjustments. Use `measure(...)` to create spans, `count(...)` for the number of recorded spans, aggregate methods such as `total(...)`, `mean(...)`, `min(...)`, `max(...)`, and `p95(...)` for durations, and `summary()` for per-label stats.
 
 ### `Date`
 
