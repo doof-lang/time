@@ -24,10 +24,10 @@ export function testReadmeMeasureElapsedTimeSafely(): none {
 }
 
 export function testReadmeBuildCalendarValuesAndMoveThemAroundSafely(): none {
-    let payrollDate = try! Date.create(2024, Month.January.value, 31)
+    let payrollDate = Date.create(2024, Month.January.value, 31)!
     let nextPayrollDate = payrollDate.plusMonths(1)
 
-    let standup = try! Time.create(9, 45)
+    let standup = Time.create(9, 45)!
     let reminderTime = standup.plusMinutes(20)
 
     let releaseWindow = DateTime.create(nextPayrollDate, reminderTime)
@@ -38,11 +38,11 @@ export function testReadmeBuildCalendarValuesAndMoveThemAroundSafely(): none {
 }
 
 export function testReadmeConvertTheSameMeetingBetweenTimeZones(): none {
-    let newYork = try! TimeZone.lookup("America/New_York")
-    let london = try! TimeZone.lookup("Europe/London")
-    let tokyo = try! TimeZone.lookup("Asia/Tokyo")
+    let newYork = TimeZone.lookup("America/New_York")!
+    let london = TimeZone.lookup("Europe/London")!
+    let tokyo = TimeZone.lookup("Asia/Tokyo")!
 
-    let meetingLocal = try! DateTime.fromParts(2024, 10, 4, 9, 30)
+    let meetingLocal = DateTime.fromParts(2024, 10, 4, 9, 30)!
     let meetingInNewYork = meetingLocal.atZone(newYork)
 
     let sameInstantInLondon = meetingInNewYork.withZoneSameInstant(london)
@@ -54,12 +54,12 @@ export function testReadmeConvertTheSameMeetingBetweenTimeZones(): none {
 }
 
 export function testReadmeParseInputAndInspectTimezoneRules(): none {
-    let launchDate = try! Date.parse("2026-04-21")
-    let publishedAt = try! Instant.parse("2026-04-22T00:00:00+10:00")
-    let reviewSlot = try! DateTime.parse("2026-04-21T16:30:00")
-    let timeout = try! Duration.parse("PT30S")
+    let launchDate = Date.parse("2026-04-21")!
+    let publishedAt = Instant.parse("2026-04-22T00:00:00+10:00")!
+    let reviewSlot = DateTime.parse("2026-04-21T16:30:00")!
+    let timeout = Duration.parse("PT30S")!
 
-    let sydney = try! TimeZone.lookup("Australia/Sydney")
+    let sydney = TimeZone.lookup("Australia/Sydney")!
     let offsetSeconds = sydney.offsetSecondsAt(publishedAt)
 
     Assert.equal(launchDate.dayOfYear(), 111)
@@ -81,6 +81,6 @@ export function testReadmeCollectTimingsWithStopwatch(): none {
     manual.finish()
 
     Assert.equal(sw.count("parse"), 2)
-    Assert.isTrue((try! sw.total("parse")).toNanos() >= 0L)
+    Assert.isTrue((sw.total("parse")!).toNanos() >= 0L)
     Assert.equal(sw.summary().entries.length, 1)
 }
