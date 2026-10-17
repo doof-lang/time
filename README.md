@@ -72,8 +72,8 @@ manual := sw.measure("render")
 manual.finish()
 
 println(sw.count("parse"))
-println((try! sw.total("parse")).toMillis())
-println((try! sw.p95("render")).toMillis())
+println(sw.total("parse")!.toMillis())
+println(sw.p95("render")!.toMillis())
 ```
 
 `Stopwatch` records named spans and reports aggregate `Duration` values for each name. Scoped spans finish automatically when the `with` block exits; manual spans can be finished explicitly and are recorded only once.
@@ -83,10 +83,10 @@ println((try! sw.p95("render")).toMillis())
 ```doof
 import { Date, DateTime, Month, Time } from "std/time"
 
-payrollDate := try! Date.create(2024, Month.January.value, 31)
+payrollDate := Date.create(2024, Month.January.value, 31)!
 nextPayrollDate := payrollDate.plusMonths(1)
 
-standup := try! Time.create(9, 45)
+standup := Time.create(9, 45)!
 reminderTime := standup.plusMinutes(20)
 
 releaseWindow := DateTime.create(nextPayrollDate, reminderTime)
@@ -103,11 +103,11 @@ println(releaseWindow.toISOString())
 ```doof
 import { DateTime, TimeZone } from "std/time"
 
-newYork := try! TimeZone.lookup("America/New_York")
-london := try! TimeZone.lookup("Europe/London")
-tokyo := try! TimeZone.lookup("Asia/Tokyo")
+newYork := TimeZone.lookup("America/New_York")!
+london := TimeZone.lookup("Europe/London")!
+tokyo := TimeZone.lookup("Asia/Tokyo")!
 
-meetingLocal := try! DateTime.fromParts(2024, 10, 4, 9, 30)
+meetingLocal := DateTime.fromParts(2024, 10, 4, 9, 30)!
 meetingInNewYork := meetingLocal.atZone(newYork)
 
 sameInstantInLondon := meetingInNewYork.withZoneSameInstant(london)
@@ -125,13 +125,13 @@ Use `withZoneSameInstant(...)` when the underlying moment must stay the same and
 ```doof
 import { Date, DateTime, Duration, Instant, TimeZone } from "std/time"
 
-launchDate := try! Date.parse("2026-04-21")
-publishedAt := try! Instant.parse("2026-04-22T00:00:00+10:00")
-servedAt := try! Instant.parseHttpDate("Tue, 21 Apr 2026 14:00:00 GMT")
-reviewSlot := try! DateTime.parse("2026-04-21T16:30:00")
-timeout := try! Duration.parse("PT30S")
+launchDate := Date.parse("2026-04-21")!
+publishedAt := Instant.parse("2026-04-22T00:00:00+10:00")!
+servedAt := Instant.parseHttpDate("Tue, 21 Apr 2026 14:00:00 GMT")!
+reviewSlot := DateTime.parse("2026-04-21T16:30:00")!
+timeout := Duration.parse("PT30S")!
 
-sydney := try! TimeZone.lookup("Australia/Sydney")
+sydney := TimeZone.lookup("Australia/Sydney")!
 offsetSeconds := sydney.offsetSecondsAt(publishedAt)
 
 println(launchDate.dayOfYear())
@@ -142,7 +142,7 @@ println("UTC offset: ${offsetSeconds} seconds")
 println("DST active: ${sydney.isDSTAt(publishedAt)}")
 ```
 
-Parsing returns `Result<T, string>`, so you can propagate failures with `try!` or handle them explicitly with `case`. `Instant.parse(...)` accepts RFC 3339 timestamps using either `Z` or numeric offsets such as `+10:00` and normalizes them to UTC.
+Parsing returns `Result<T, string>`, so you can unwrap with postfix `!`, propagate failures with `try`, or handle them explicitly with `case`. `Instant.parse(...)` accepts RFC 3339 timestamps using either `Z` or numeric offsets such as `+10:00` and normalizes them to UTC.
 
 ## Type Guide
 
