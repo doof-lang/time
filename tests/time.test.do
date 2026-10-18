@@ -118,6 +118,36 @@ export function testThreadSleepDelaysCurrentThread(): none {
     Assert.isTrue(elapsed.toMillis() >= 1L)
 }
 
+class ConcurrentSleeper {
+    sleepMillis(millis: long): bool {
+        Thread.sleep(Duration.ofMillis(millis))
+        return true
+    }
+}
+
+// Thread.sleep must release the runtime CPU token while blocked; otherwise
+// only about core-count actors can sleep at once and this takes several
+// rounds of 50ms instead of one.
+export function testThreadSleepDoesNotHoldCpuTokenAcrossActors(): none {
+    let sleepers: Actor<ConcurrentSleeper>[] = []
+    for i of 0..<64 {
+        sleepers.push(Actor<ConcurrentSleeper>())
+    }
+    let startedAt = MonotonicInstant.now()
+    let pending: Promise<bool>[] = []
+    for sleeper of sleepers {
+        pending.push(async sleeper.sleepMillis(50L))
+    }
+    for result of pending {
+        Assert.isTrue(result.get()!)
+    }
+    let elapsed = startedAt.durationUntil(MonotonicInstant.now())
+    for sleeper of sleepers {
+        retire sleeper
+    }
+    Assert.isTrue(elapsed.toMillis() < 150L)
+}
+
 export function testMonotonicInstantMeasuresElapsedTime(): none {
     let startedAt = MonotonicInstant.now()
     Thread.sleep(Duration.ofMillis(2L))

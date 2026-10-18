@@ -777,6 +777,7 @@ void thread_sleep_nanos(int64_t nanos) {
     if (nanos <= 0) {
         return;
     }
+    doof::CpuTokenRelease release;
     std::this_thread::sleep_for(std::chrono::nanoseconds(nanos));
 }
 
