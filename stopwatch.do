@@ -136,10 +136,7 @@ export class Stopwatch {
     }
 
     private bucketFor(name: string): TimerBucket | none {
-        return case timers.get(name) {
-            s: Success -> s.value,
-            _: Failure -> none
-        }
+        return timers.get(name)?
     }
 
     private requireBucket(name: string): Result<TimerBucket, TimerError> {
@@ -154,17 +151,15 @@ export class StopwatchSpan {
     stopwatch: Stopwatch
     readonly name: string
     readonly startedAt: MonotonicInstant
-    private let finished: bool = false
     private let finishedDuration: Duration | none = none
 
     finish(): Duration {
-        if finished {
-            return finishedDuration!
+        if duration := finishedDuration {
+            return duration
         }
 
         let elapsed = startedAt.durationUntil(MonotonicInstant.now())
         stopwatch.record(name, elapsed)
-        finished = true
         finishedDuration = elapsed
         return elapsed
     }
